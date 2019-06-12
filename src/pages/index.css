@@ -1,0 +1,219 @@
+@import url("https://fonts.googleapis.com/css?family=Poppins:400,700|Rubik:500,700&display=swap");
+
+html {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  color: #606060;
+  font-size: 18px;
+}
+
+body {
+  padding: 2rem 1rem;
+}
+
+h1,
+h2 {
+  font-family: "Rubik", sans-serif;
+}
+
+h1 {
+  font-size: 48px;
+  color: rgba(0, 211, 136, 1);
+  margin: 0;
+}
+
+h2 {
+  font-size: 28px;
+  font-weight: 500;
+  color: #38415b;
+  margin-top: 2rem;
+}
+
+h1 + h2 {
+  margin-top: 0.5em;
+  color: rgba(0, 211, 136, 1);
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
+}
+
+label {
+  font-family: "Rubik", sans-serif;
+  color: #818388;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.form-item {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.form-item + .form-item {
+  margin-top: 2em;
+}
+
+.input {
+  display: flex;
+}
+
+.number-input {
+  border: 0;
+  width: 100%;
+  font-size: 48px;
+  border-bottom: 2px solid #eee;
+  color: #38415b;
+  font-family: "Rubik", sans-serif;
+}
+.input::after {
+  content: "€";
+  font-size: 48px;
+  color: #38415b;
+  font-family: "Rubik", sans-serif;
+}
+
+.number-input::placeholder {
+  color: #e5e5e5;
+}
+
+.chart label {
+  display: block;
+  text-align: right;
+  margin-top: 1em;
+  font-family: "Poppins", sans-serif;
+  text-transform: none;
+}
+
+.chart {
+  margin-bottom: 2em;
+}
+
+.heatmap {
+  margin-top: 2rem;
+  position: relative;
+}
+
+.heatmap::before,
+.heatmap::after {
+  color: #38415b;
+  text-transform: uppercase;
+  font-size: 13px;
+  font-family: "Rubik", sans-serif;
+}
+
+.heatmap::before {
+  content: "osinko";
+}
+.heatmap::after {
+  content: "palkka";
+  text-align: center;
+  margin-left: 35px;
+}
+
+table {
+  border-spacing: 6px;
+  border-collapse: separate;
+  align-self: center;
+}
+
+table + label {
+  text-align: center;
+  display: block;
+  margin-left: 32px;
+}
+
+th {
+  font-size: 13px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  padding: 0 4px;
+}
+td:not(:first-child) {
+  background: #efefef;
+  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+}
+
+td.heatmap-cell--high {
+  background: #ff553e;
+}
+td.heatmap-cell--medium {
+  background: #ffac05;
+}
+td.heatmap-cell--ideal {
+  background: #00d388;
+}
+td.heatmap-cell--low {
+  background: #b3ffba;
+}
+
+/* Tooltip */
+
+.__react_component_tooltip.type-dark {
+  background: #38415b;
+  font-family: "Poppins", sans-serif;
+  text-align: center;
+  color: #d3d3d3;
+  border-radius: 10px;
+  padding: 1.5em 1em;
+  font-size: 14px;
+}
+.__react_component_tooltip.show {
+  opacity: 1;
+}
+.__react_component_tooltip.type-dark.place-top:after {
+  border-top-color: #38415b;
+}
+
+.tooltip strong {
+  color: #fff;
+}
+
+.tooltip__title {
+  font-family: "Rubik", sans-serif;
+  font-weight: 500;
+  display: block;
+  font-size: 20px;
+}
+
+/* Card */
+
+.card {
+  color: #ffffff;
+  font-family: "Rubik", sans-serif;
+  font-weight: 500;
+  font-size: 28px;
+  border-radius: 20px;
+  padding: 1em 1em;
+}
+
+.card + .card {
+  margin-top: 1rem;
+}
+
+.card--ideal {
+  background: linear-gradient(116.5deg, #67e5b8 0%, #50e1ad 100%);
+}
+
+.card--cheapest {
+  background: linear-gradient(116.5deg, #f4ddd2 0%, #f0d0c2 100%);
+}
+
+.card--worst {
+  background: linear-gradient(116.5deg, #f0ccd8 0%, #ecbfce 100%);
+}
+
+.card__title {
+  font-family: "Rubik", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+  margin-top: 0;
+}
+
+.card__value {
+  color: #38415b;
+}
+
+.card__value-type {
+}
