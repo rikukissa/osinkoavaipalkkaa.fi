@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from "react"
+import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 
 import SEO from "../components/seo"
 import "./index.css"
@@ -9,36 +9,80 @@ const range = (n: number) =>
     .map((_, i) => i)
 
 function Chart({ label }: { label: string }) {
+  const [chartLoaded, setChartLoaded] = useState(false)
   const points = range(10).map(i => [
     10 * (i + 1),
     50 - Math.random() * 20 - i * 2,
   ])
+  const svg = useRef<SVGSVGElement>(null)
+
+  useEffect(() => setChartLoaded(Boolean(svg.current)), [svg])
 
   return (
     <div className="chart">
-      <svg viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")} V50Z`}
-          fill="url(#paint0_linear)"
-        />
-        <path
-          d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
-          stroke="#D68560"
-        />
-        <defs>
-          <linearGradient
-            id="paint0_linear"
-            x1="124"
-            y1="3"
-            x2="124"
-            y2="53.5"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor="#F7D6C8" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
+      <ReactTooltip id="kikki" effect="solid">
+        <div className="tooltip">
+          <strong className="tooltip__title">40 000 €</strong>
+          <span>
+            Veroprosentti <strong>23,9%</strong>
+          </span>
+        </div>
+      </ReactTooltip>
+      <div className="svg-container">
+        <svg
+          ref={svg}
+          viewBox="0 0 100 50"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")} V50Z`}
+            fill="url(#paint0_linear)"
+          />
+          <path
+            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
+            stroke="#D68560"
+          />
+          <defs>
+            <linearGradient
+              id="paint0_linear"
+              x1="124"
+              y1="3"
+              x2="124"
+              y2="53.5"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stopColor="#F7D6C8" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
+        {chartLoaded && (
+          <div className="tooltip-overlay">
+            <ReactTooltip id="kikki" effect="solid">
+              <div className="tooltip">
+                <strong className="tooltip__title">40 000 €</strong>
+                <span>
+                  Veroprosentti <strong>23,9%</strong>
+                </span>
+              </div>
+            </ReactTooltip>
+            {points.map(([x, y], i) => (
+              <div
+                data-tip="true"
+                data-for="kikki"
+                key={i.toString()}
+                className="tooltip-area"
+                data-offset={`{'top': -${(svg.current!.getBoundingClientRect()
+                  .height /
+                  50) *
+                  y -
+                  10}}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <label>Palkkatulon vaikutus verotukseen</label>
     </div>
   )
