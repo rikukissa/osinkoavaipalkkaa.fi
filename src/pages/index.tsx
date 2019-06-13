@@ -8,41 +8,58 @@ const range = (n: number) =>
     .fill(null)
     .map((_, i) => i)
 
-function Chart({ label }: { label: string }) {
-  const [chartLoaded, setChartLoaded] = useState(false)
-  const points = range(10).map(i => [
-    10 * (i + 1),
-    50 - Math.random() * 20 - i * 2,
-  ])
-  const svg = useRef<SVGSVGElement>(null)
+function PointWithTooltip({
+  x,
+  y,
+  width,
+}: {
+  x: number
+  y: number
+  width: number
+}) {
+  const ref = useRef<SVGCircleElement>(null)
 
-  useEffect(() => setChartLoaded(Boolean(svg.current)), [svg])
+  const focusCircle = () => ReactTooltip.show(ref.current!)
+
+  return (
+    <>
+      <circle
+        data-tip="true"
+        data-for="kikki"
+        ref={ref}
+        fill="#D68560"
+        cx={x}
+        cy={y}
+        r="1"
+      />
+      <rect
+        onTouchStart={focusCircle}
+        onMouseEnter={focusCircle}
+        x={x - width / 2}
+        y={0}
+        width={width}
+        height="50"
+      />
+    </>
+  )
+}
+
+function Chart({ label }: { label: string }) {
+  const TICKS = 20
+  const WIDTH = 100
+  const points = range(TICKS).map(i => [
+    (WIDTH / TICKS) * (i + 1),
+    Math.min(47, 40 - (i * 1 + (-5 + Math.random() * 10))),
+  ])
 
   return (
     <div className="chart">
-      <ReactTooltip id="kikki" effect="solid">
-        <div className="tooltip">
-          <strong className="tooltip__title">40 000 €</strong>
-          <span>
-            Veroprosentti <strong>23,9%</strong>
-          </span>
-        </div>
-      </ReactTooltip>
       <div className="svg-container">
         <svg
-          ref={svg}
-          viewBox="0 0 100 50"
+          viewBox={`0 0 ${WIDTH} 50`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")} V50Z`}
-            fill="url(#paint0_linear)"
-          />
-          <path
-            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
-            stroke="#D68560"
-          />
           <defs>
             <linearGradient
               id="paint0_linear"
@@ -56,32 +73,31 @@ function Chart({ label }: { label: string }) {
               <stop offset="1" stopColor="#fff" stopOpacity="0" />
             </linearGradient>
           </defs>
+          <path
+            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")} V50Z`}
+            fill="url(#paint0_linear)"
+          />
+          <path
+            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
+            stroke="#D68560"
+          />
+          {points.map(([x, y], i) => (
+            <PointWithTooltip
+              key={i}
+              x={x}
+              y={y}
+              width={WIDTH / points.length}
+            />
+          ))}
         </svg>
-        {chartLoaded && (
-          <div className="tooltip-overlay">
-            <ReactTooltip id="kikki" effect="solid">
-              <div className="tooltip">
-                <strong className="tooltip__title">40 000 €</strong>
-                <span>
-                  Veroprosentti <strong>23,9%</strong>
-                </span>
-              </div>
-            </ReactTooltip>
-            {points.map(([x, y], i) => (
-              <div
-                data-tip="true"
-                data-for="kikki"
-                key={i.toString()}
-                className="tooltip-area"
-                data-offset={`{'top': -${(svg.current!.getBoundingClientRect()
-                  .height /
-                  50) *
-                  y -
-                  10}}`}
-              />
-            ))}
+        <ReactTooltip id="kikki" effect="solid">
+          <div className="tooltip">
+            <strong className="tooltip__title">40 000 €</strong>
+            <span>
+              Veroprosentti <strong>23,9%</strong>
+            </span>
           </div>
-        )}
+        </ReactTooltip>
       </div>
       <label>Palkkatulon vaikutus verotukseen</label>
     </div>

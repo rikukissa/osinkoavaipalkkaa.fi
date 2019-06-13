@@ -91,19 +91,6 @@ label {
   position: relative;
 }
 
-.tooltip-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-}
-.tooltip-area {
-  flex-grow: 1;
-  transform: translateX(50%);
-}
-
 .heatmap {
   margin-top: 2rem;
   position: relative;
@@ -233,4 +220,7 @@ td.heatmap-cell--low {
 }
 
 .card__value-type {
+}
+rect {
+  pointer-events: all;
 }
