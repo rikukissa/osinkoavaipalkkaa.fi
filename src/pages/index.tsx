@@ -1,6 +1,7 @@
 import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 
 import SEO from "../components/seo"
+import { INCOME_TAX } from "../income-tax"
 import "./index.css"
 import ReactTooltip from "react-tooltip"
 const range = (n: number) =>
@@ -12,7 +13,9 @@ function PointWithTooltip({
   x,
   y,
   width,
+  id,
 }: {
+  id: number
   x: number
   y: number
   width: number
@@ -24,13 +27,13 @@ function PointWithTooltip({
   return (
     <>
       <circle
-        data-tip="true"
-        data-for="kikki"
+        data-tip={id}
+        data-for="chart"
         ref={ref}
         fill="#D68560"
         cx={x}
         cy={y}
-        r="1"
+        r="0.01"
       />
       <rect
         onTouchStart={focusCircle}
@@ -45,18 +48,20 @@ function PointWithTooltip({
 }
 
 function Chart({ label }: { label: string }) {
-  const TICKS = 20
+  const TICKS = INCOME_TAX.length
   const WIDTH = 100
-  const points = range(TICKS).map(i => [
+  const HEIGHT = 50
+
+  const points = INCOME_TAX.map(({ income, percentage }, i) => [
     (WIDTH / TICKS) * (i + 1),
-    Math.min(47, 40 - (i * 1 + (-5 + Math.random() * 10))),
+    HEIGHT - percentage / 2,
   ])
 
   return (
     <div className="chart">
       <div className="svg-container">
         <svg
-          viewBox={`0 0 ${WIDTH} 50`}
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -74,11 +79,13 @@ function Chart({ label }: { label: string }) {
             </linearGradient>
           </defs>
           <path
-            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")} V50Z`}
+            d={`M0 ${HEIGHT} ${points
+              .map(([x, y]) => `L${x} ${y}`)
+              .join(" ")} V${HEIGHT}Z`}
             fill="url(#paint0_linear)"
           />
           <path
-            d={`M0 50 ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
+            d={`M0 ${HEIGHT} ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
             stroke="#D68560"
           />
           {points.map(([x, y], i) => (
@@ -87,17 +94,32 @@ function Chart({ label }: { label: string }) {
               x={x}
               y={y}
               width={WIDTH / points.length}
+              id={INCOME_TAX[i].income}
             />
           ))}
         </svg>
-        <ReactTooltip id="kikki" effect="solid">
-          <div className="tooltip">
-            <strong className="tooltip__title">40 000 €</strong>
-            <span>
-              Veroprosentti <strong>23,9%</strong>
-            </span>
-          </div>
-        </ReactTooltip>
+        <ReactTooltip
+          id="chart"
+          effect="solid"
+          getContent={id => {
+            if (!id) {
+              return
+            }
+
+            const bracket = INCOME_TAX.find(
+              ({ income }) => income.toString() === id
+            )!
+
+            return (
+              <div className="tooltip">
+                <strong className="tooltip__title">{bracket.income} €</strong>
+                <span>
+                  Veroprosentti <strong>{bracket.percentage}%</strong>
+                </span>
+              </div>
+            )
+          }}
+        />
       </div>
       <label>Palkkatulon vaikutus verotukseen</label>
     </div>
@@ -197,101 +219,125 @@ function Card({
   )
 }
 
-const IndexPage = () => (
-  <div>
-    <SEO title="Home" />
-    <ReactTooltip id="happyFace" effect="solid">
-      <div className="tooltip">
-        <strong className="tooltip__title">40 000 €</strong>
-        <span>
-          Veroprosentti <strong>23,9%</strong>
-        </span>
-      </div>
-    </ReactTooltip>
-    <h1>Osinkoa vai palkkaa?</h1>
-    <h2>Ja kuinka paljon?</h2>
-    <p>Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?</p>
-    <section>
-      <form>
-        <div className="form-item">
-          <label htmlFor="minimum-income">Pakolliset elinkustannukset</label>
-          <div className="input">
-            <input type="tel" className="number-input" id="minimum-income" />
-          </div>
+const IndexPage = () => {
+  const [state, setState] = useState({
+    livingExpenses: 20000,
+    companyNetWorth: 100000,
+    companyProfitEstimate: 150000,
+  })
+
+  return (
+    <div>
+      <SEO title="Home" />
+      <ReactTooltip id="happyFace" effect="solid">
+        <div className="tooltip">
+          <strong className="tooltip__title">40 000 €</strong>
+          <span>
+            Veroprosentti <strong>23,9%</strong>
+          </span>
         </div>
-
-        <Chart label="Palkkatulon vaikutus verotukseen" />
-
-        <div className="form-item">
-          <label htmlFor="company-value">Yrityksen varallisuus</label>
-          <div className="input">
-            <input
-              type="tel"
-              className="number-input"
-              placeholder="100 000"
-              id="company-value"
-            />
+      </ReactTooltip>
+      <h1>Osinkoa vai palkkaa?</h1>
+      <h2>Ja kuinka paljon?</h2>
+      <p>Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?</p>
+      <section>
+        <form>
+          <div className="form-item">
+            <label htmlFor="minimum-income">Pakolliset elinkustannukset</label>
+            <div className="input">
+              <input
+                type="number"
+                value={state.livingExpenses}
+                className="number-input"
+                id="minimum-income"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="form-item">
-          <label htmlFor="profit-prediction">Yrityksen nettotulo ennuste</label>
-          <div className="input">
-            <input type="tel" className="number-input" id="profit-prediction" />
+          <Chart label="Palkkatulon vaikutus verotukseen" />
+
+          <div className="form-item">
+            <label htmlFor="company-value">Yrityksen varallisuus</label>
+            <div className="input">
+              <input
+                value={state.companyNetWorth}
+                type="tel"
+                className="number-input"
+                placeholder="100 000"
+                id="company-value"
+              />
+            </div>
           </div>
-        </div>
-      </form>
-    </section>
 
-    <section>
-      <h2>Palkan & osingon suhde verotukseen</h2>
-      <p>
-        Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään.
-        Seuraavasta taulukosta näet verotuksellisesti edullisimman vaihtoehdon.
-      </p>
-      <Heatmap />
-    </section>
+          <div className="form-item">
+            <label htmlFor="profit-prediction">
+              Yrityksen nettotulo ennuste
+            </label>
+            <div className="input">
+              <input
+                value={state.companyProfitEstimate}
+                type="tel"
+                className="number-input"
+                id="profit-prediction"
+              />
+            </div>
+          </div>
+        </form>
+      </section>
 
-    <section>
-      <h2>Laskelmat</h2>
-      <p>Pakollisiin elinkustannuksiisi suhtautettu veroedullisin vaihtoehto</p>
-      <Card className="card--ideal" title="paras vaihtoehto">
-        <span className="card__value">15 000€ </span>
-        <span className="card__value-type">osinkoa</span>
-        <br />
-        <span className="card__value">15 000€ </span>
-        <span className="card__value-type">palkkaa</span>
-      </Card>
-      <p>
-        Alentamalla elinkustannuksiasi <strong>10 000 €</strong>, sinä
-        säästäisit <strong>2546 €</strong> ja yrityksesti{" "}
-        <strong>12 343 €</strong>.
-      </p>
-      <Card className="card--cheapest" title="edullisin vaihtoehto">
-        <span className="card__value">15 000€ </span>
-        <span className="card__value-type">osinkoa</span>
-        <br />
-        <span className="card__value">15 000€ </span>
-        <span className="card__value-type">palkkaa</span>
-      </Card>
-      <Card className="card--worst" title="kallein vaihtoehto">
-        <span className="card__value">15 000€ </span>
-        <span className="card__value-type">osinkoa</span>
-        <br />
-        <span className="card__value">15 000€ </span>
-        <span className="card__value-type">palkkaa</span>
-      </Card>
-    </section>
-    <section>
-      <h2>Lisätietoa?</h2>
-      <p>
-        Osinkoavaipalkkaa.fi PRO tarjoaa sinulle avaimet vero-optimointiin
-        halpaan 1000 € vuosihintaan. Mikäli opiskelijakorttisi on vielä
-        voimassa, alennamme hinnan kuitenkin edulliseen 20 € hintaan
-        kuukaudessa.
-      </p>
-    </section>
-  </div>
-)
+      <section>
+        <h2>Palkan & osingon suhde verotukseen</h2>
+        <p>
+          Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään.
+          Seuraavasta taulukosta näet verotuksellisesti edullisimman
+          vaihtoehdon.
+        </p>
+        <Heatmap />
+      </section>
+
+      <section>
+        <h2>Laskelmat</h2>
+        <p>
+          Pakollisiin elinkustannuksiisi suhtautettu veroedullisin vaihtoehto
+        </p>
+        <Card className="card--ideal" title="paras vaihtoehto">
+          <span className="card__value">15 000€ </span>
+          <span className="card__value-type">osinkoa</span>
+          <br />
+          <span className="card__value">15 000€ </span>
+          <span className="card__value-type">palkkaa</span>
+        </Card>
+        <p>
+          Alentamalla elinkustannuksiasi <strong>10 000 €</strong>, sinä
+          säästäisit <strong>2546 €</strong> ja yrityksesti{" "}
+          <strong>12 343 €</strong>.
+        </p>
+        <Card className="card--cheapest" title="edullisin vaihtoehto">
+          <span className="card__value">15 000€ </span>
+          <span className="card__value-type">osinkoa</span>
+          <br />
+          <span className="card__value">15 000€ </span>
+          <span className="card__value-type">palkkaa</span>
+        </Card>
+        <Card className="card--worst" title="kallein vaihtoehto">
+          <span className="card__value">15 000€ </span>
+          <span className="card__value-type">osinkoa</span>
+          <br />
+          <span className="card__value">15 000€ </span>
+          <span className="card__value-type">palkkaa</span>
+        </Card>
+      </section>
+      <section>
+        <h2>Lisätietoa?</h2>
+        <p>
+          Osinkoavaipalkkaa.fi PRO tarjoaa sinulle avaimet vero-optimointiin
+          halpaan 1000 € vuosihintaan. Mikäli opiskelijakorttisi on vielä
+          voimassa, alennamme hinnan kuitenkin edulliseen 20 € hintaan
+          kuukaudessa.
+        </p>
+      </section>
+    </div>
+  )
+}
 
 export default IndexPage
