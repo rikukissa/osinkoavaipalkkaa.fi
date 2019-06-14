@@ -1,5 +1,16 @@
 import { INCOME_TAX } from "./income-tax"
 
+const f = (a: any[], b: any[]) =>
+  [].concat(...a.map(a => b.map(b => [].concat(a, b))))
+
+export function permutate<T>(
+  a: any[] | any[],
+  b?: any[],
+  ...c: any[][]
+): T[][] {
+  return b ? permutate(f(a, b), ...c) : a
+}
+
 type TaxPercentage = number
 
 /*
@@ -49,5 +60,13 @@ export function getTotalTaxEuroAmount(
     getIncomeTaxEuroAmount(grossIncome) +
     getCapitalGainsTaxEuroAmount(capitalGains) +
     getCorporateTax(companyProfit)
+  )
+}
+export function getNetIncome(grossIncome: number, capitalGains: number) {
+  return (
+    grossIncome -
+    getIncomeTaxEuroAmount(grossIncome) +
+    capitalGains -
+    getCapitalGainsTaxEuroAmount(capitalGains)
   )
 }

@@ -1,9 +1,17 @@
+import ReactTooltip from "react-tooltip"
 import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
+import minBy from "lodash/minBy"
+import maxBy from "lodash/maxBy"
 
 import SEO from "../components/seo"
 import { INCOME_TAX } from "../income-tax"
+import {
+  permutate,
+  getTotalTaxEuroAmount,
+  getIncomeTaxEuroAmount,
+  getNetIncome,
+} from "../formulas"
 import "./index.css"
-import ReactTooltip from "react-tooltip"
 const range = (n: number) =>
   Array(n)
     .fill(null)
@@ -125,12 +133,141 @@ function Chart({ label }: { label: string }) {
     </div>
   )
 }
-function Heatmap() {
+
+interface IScenario {
+  dividents: number
+  salary: number
+  netIncome: number
+  taxes: number
+}
+
+function Heatmap({
+  livingExpenses,
+  companyNetWorth,
+  companyProfitEstimate,
+}: {
+  livingExpenses: number
+  companyNetWorth: number
+  companyProfitEstimate: number
+}) {
+  const brackets = [0, 1000, 5000, 10000, 15000, 30000, 40000]
+
+  const scenarios = permutate<number>(brackets, brackets)
+    .filter(
+      ([dividents, salary]) =>
+        salary <= companyProfitEstimate && dividents <= companyNetWorth
+    )
+    .map(([dividents, salary]) => ({
+      dividents,
+      salary,
+      netIncome: getNetIncome(salary, dividents),
+      taxes: getTotalTaxEuroAmount(
+        salary,
+        dividents,
+        companyProfitEstimate - salary
+      ),
+    }))
+    .sort((a, b) => a.taxes - b.taxes)
+
+  // const [cheapest] = scenarios
+  const top8Cheapest = scenarios.slice(0, 8)
+  const top5Expensive = scenarios.slice(-5)
+  const mediumTier = scenarios.slice(-15, -5)
+  const [ideal] = scenarios.filter(
+    ({ netIncome }) => netIncome >= livingExpenses
+  )
+
+  const groupedByDividents = scenarios.reduce(
+    (groups, scenario) => {
+      groups[scenario.dividents] = groups[scenario.dividents] || []
+      groups[scenario.dividents].push(scenario)
+      groups[scenario.dividents].sort((a, b) => a.salary - b.salary)
+      return groups
+    },
+    {} as { [key: string]: IScenario[] }
+  )
+
+  const formatLabel = (label: number) =>
+    label >= 1000 ? `${label / 1000}k` : label
+
+  function getClassName(scenario: IScenario) {
+    if (scenario === ideal) {
+      return "heatmap-cell--ideal"
+    }
+    if (top8Cheapest.includes(scenario)) {
+      return "heatmap-cell--low"
+    }
+    if (top5Expensive.includes(scenario)) {
+      return "heatmap-cell--high"
+    }
+    if (mediumTier.includes(scenario)) {
+      return "heatmap-cell--medium"
+    }
+  }
+
+  // <td className="heatmap-cell--high"></td>
+  // <td className="heatmap-cell--low"></td>
+  // <td className="heatmap-cell--ideal"></td>
+  // <td className="heatmap-cell--medium"></td>
+
   return (
     <div className="heatmap">
+      <ReactTooltip
+        id="heatmap"
+        effect="solid"
+        getContent={id => {
+          if (!id) {
+            return
+          }
+          const [dividents, salary] = id.split("-")
+
+          const scenario = groupedByDividents[dividents][parseInt(salary, 10)]
+
+          return (
+            <div className="tooltip">
+              <strong className="tooltip__title">{scenario.netIncome} €</strong>
+              <span>
+                <strong>${scenario.dividents}</strong> osinkoa
+              </span>
+              <br />
+              <span>
+                <strong>${scenario.salary}</strong> palkkaa
+              </span>
+              <br />
+              <span>
+                <strong>${scenario.taxes}</strong> veroja
+              </span>
+            </div>
+          )
+        }}
+      />
       <table>
         <tbody>
+          {Object.keys(groupedByDividents)
+            .sort((a, b) => parseInt(b, 10) - parseInt(a, 10))
+            .map(key => {
+              const sces = groupedByDividents[key]
+              return (
+                <tr key={key}>
+                  <th>{formatLabel(parseInt(key, 10))}</th>
+                  {sces.map((scenario, i) => (
+                    <td
+                      key={key + scenario.salary}
+                      data-tip={`${key}-${i}`}
+                      data-for="heatmap"
+                      className={getClassName(scenario)}
+                    />
+                  ))}
+                </tr>
+              )
+            })}
           <tr>
+            <td></td>
+            {brackets.map(bracket => (
+              <th key={bracket}>{formatLabel(bracket)}</th>
+            ))}
+          </tr>
+          {/* <tr>
             <th>40k</th>
             <td data-tip="true" data-for="happyFace"></td>
             <td data-tip="true" data-for="happyFace"></td>
@@ -199,7 +336,7 @@ function Heatmap() {
             <th>30k</th>
             <th>40k</th>
             <th>50k</th>
-          </tr>
+          </tr> */}
         </tbody>
       </table>
     </div>
@@ -229,14 +366,6 @@ const IndexPage = () => {
   return (
     <div>
       <SEO title="Home" />
-      <ReactTooltip id="happyFace" effect="solid">
-        <div className="tooltip">
-          <strong className="tooltip__title">40 000 €</strong>
-          <span>
-            Veroprosentti <strong>23,9%</strong>
-          </span>
-        </div>
-      </ReactTooltip>
       <h1>Osinkoa vai palkkaa?</h1>
       <h2>Ja kuinka paljon?</h2>
       <p>Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?</p>
@@ -292,7 +421,11 @@ const IndexPage = () => {
           Seuraavasta taulukosta näet verotuksellisesti edullisimman
           vaihtoehdon.
         </p>
-        <Heatmap />
+        <Heatmap
+          livingExpenses={state.livingExpenses}
+          companyNetWorth={state.companyNetWorth}
+          companyProfitEstimate={state.companyProfitEstimate}
+        />
       </section>
 
       <section>

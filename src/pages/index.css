@@ -111,6 +111,7 @@ label {
   content: "palkka";
   text-align: center;
   margin-left: 35px;
+  display: block;
 }
 
 table {
