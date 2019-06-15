@@ -169,7 +169,6 @@ function Heatmap({
     }))
     .sort((a, b) => a.taxes - b.taxes)
 
-  // const [cheapest] = scenarios
   const top8Cheapest = scenarios.slice(0, 8)
   const top5Expensive = scenarios.slice(-5)
   const mediumTier = scenarios.slice(-15, -5)
@@ -204,12 +203,6 @@ function Heatmap({
       return "heatmap-cell--medium"
     }
   }
-
-  // <td className="heatmap-cell--high"></td>
-  // <td className="heatmap-cell--low"></td>
-  // <td className="heatmap-cell--ideal"></td>
-  // <td className="heatmap-cell--medium"></td>
-
   return (
     <div className="heatmap">
       <ReactTooltip
@@ -262,81 +255,11 @@ function Heatmap({
               )
             })}
           <tr>
-            <td></td>
+            <td />
             {brackets.map(bracket => (
               <th key={bracket}>{formatLabel(bracket)}</th>
             ))}
           </tr>
-          {/* <tr>
-            <th>40k</th>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-          </tr>
-          <tr>
-            <th>30k</th>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-          </tr>
-          <tr>
-            <th>15k</th>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-            <td data-tip="true" data-for="happyFace"></td>
-          </tr>
-          <tr>
-            <th>10k</th>
-            <td className="heatmap-cell--high"></td>
-            <td className="heatmap-cell--low"></td>
-            <td className="heatmap-cell--ideal"></td>
-            <td className="heatmap-cell--medium"></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <th>5k</th>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <th>1k</th>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <th>1k</th>
-            <th>5k</th>
-            <th>10k</th>
-            <th>15k</th>
-            <th>30k</th>
-            <th>40k</th>
-            <th>50k</th>
-          </tr> */}
         </tbody>
       </table>
     </div>
@@ -365,17 +288,25 @@ const IndexPage = () => {
 
   return (
     <div>
-      <SEO title="Home" />
-      <h1>Osinkoa vai palkkaa?</h1>
-      <h2>Ja kuinka paljon?</h2>
-      <p>Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?</p>
       <section>
-        <form>
+        <SEO title="Home" />
+        <h1>Osinkoa vai palkkaa?</h1>
+        <h2>Ja kuinka paljon?</h2>
+        <p>
+          Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?
+        </p>
+      </section>
+      <section>
+        <h2>Perustiedot</h2>
+        <p>
+          sd fölsdfk ösldfksö dlkfö lsdölf dsökf öldfsklö sdfklö klsdkölkfds
+        </p>
+        <form className="details-form">
           <div className="form-item">
             <label htmlFor="minimum-income">Pakolliset elinkustannukset</label>
             <div className="input">
               <input
-                type="number"
+                type="text"
                 value={state.livingExpenses}
                 className="number-input"
                 id="minimum-income"
@@ -390,7 +321,7 @@ const IndexPage = () => {
             <div className="input">
               <input
                 value={state.companyNetWorth}
-                type="tel"
+                type="text"
                 className="number-input"
                 placeholder="100 000"
                 id="company-value"
@@ -405,7 +336,7 @@ const IndexPage = () => {
             <div className="input">
               <input
                 value={state.companyProfitEstimate}
-                type="tel"
+                type="text"
                 className="number-input"
                 id="profit-prediction"
               />
@@ -445,20 +376,22 @@ const IndexPage = () => {
           säästäisit <strong>2546 €</strong> ja yrityksesti{" "}
           <strong>12 343 €</strong>.
         </p>
-        <Card className="card--cheapest" title="edullisin vaihtoehto">
-          <span className="card__value">15 000€ </span>
-          <span className="card__value-type">osinkoa</span>
-          <br />
-          <span className="card__value">15 000€ </span>
-          <span className="card__value-type">palkkaa</span>
-        </Card>
-        <Card className="card--worst" title="kallein vaihtoehto">
-          <span className="card__value">15 000€ </span>
-          <span className="card__value-type">osinkoa</span>
-          <br />
-          <span className="card__value">15 000€ </span>
-          <span className="card__value-type">palkkaa</span>
-        </Card>
+        <div className="cards">
+          <Card className="card--cheapest" title="edullisin vaihtoehto">
+            <span className="card__value">15 000€ </span>
+            <span className="card__value-type">osinkoa</span>
+            <br />
+            <span className="card__value">15 000€ </span>
+            <span className="card__value-type">palkkaa</span>
+          </Card>
+          <Card className="card--worst" title="kallein vaihtoehto">
+            <span className="card__value">15 000€ </span>
+            <span className="card__value-type">osinkoa</span>
+            <br />
+            <span className="card__value">15 000€ </span>
+            <span className="card__value-type">palkkaa</span>
+          </Card>
+        </div>
       </section>
       <section>
         <h2>Lisätietoa?</h2>

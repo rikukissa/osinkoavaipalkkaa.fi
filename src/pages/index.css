@@ -81,6 +81,7 @@ label {
   margin-top: 1em;
   font-family: "Poppins", sans-serif;
   text-transform: none;
+  font-size: 15px;
 }
 
 .chart {
@@ -94,6 +95,7 @@ label {
 .heatmap {
   margin-top: 2rem;
   position: relative;
+  display: inline-block;
 }
 
 .heatmap::before,
@@ -224,4 +226,40 @@ td.heatmap-cell--low {
 }
 rect {
   pointer-events: all;
+}
+
+@media (min-width: 800px) {
+  .details-form {
+    display: grid;
+    grid-template-columns: 300px auto;
+    grid-gap: 0 2em;
+  }
+  .form-item {
+    grid-column: 1;
+  }
+  .chart {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    grid-row-start: 1;
+    grid-row-end: 4;
+  }
+  section {
+    max-width: 1000px;
+    margin: auto;
+  }
+  .form-item + .form-item {
+    margin-top: 1em;
+  }
+  .card {
+    width: 275px;
+    margin-right: 1em;
+  }
+  .card + .card {
+    margin-top: 0rem;
+  }
+  .cards {
+    display: flex;
+  }
 }
