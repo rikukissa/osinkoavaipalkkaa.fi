@@ -70,3 +70,10 @@ export function getNetIncome(grossIncome: number, capitalGains: number) {
     getCapitalGainsTaxEuroAmount(capitalGains)
   )
 }
+
+export function getPersonalTaxes(grossIncome: number, capitalGains: number) {
+  return (
+    getIncomeTaxEuroAmount(grossIncome) +
+    getCapitalGainsTaxEuroAmount(capitalGains)
+  )
+}

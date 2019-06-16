@@ -1,21 +1,16 @@
 import ReactTooltip from "react-tooltip"
-import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
-import minBy from "lodash/minBy"
-import maxBy from "lodash/maxBy"
+import React, { PropsWithChildren, useRef, useState } from "react"
 
 import SEO from "../components/seo"
 import { INCOME_TAX } from "../income-tax"
 import {
   permutate,
   getTotalTaxEuroAmount,
-  getIncomeTaxEuroAmount,
   getNetIncome,
+  getPersonalTaxes,
+  getCorporateTax,
 } from "../formulas"
 import "./index.css"
-const range = (n: number) =>
-  Array(n)
-    .fill(null)
-    .map((_, i) => i)
 
 function PointWithTooltip({
   x,
@@ -120,7 +115,10 @@ function Chart({ label }: { label: string }) {
 
             return (
               <div className="tooltip">
-                <strong className="tooltip__title">{bracket.income} €</strong>
+                <strong className="tooltip__title">
+                  <Currency>{bracket.income}</Currency>
+                  <br /> palkkaa
+                </strong>
                 <span>
                   Veroprosentti <strong>{bracket.percentage}%</strong>
                 </span>
@@ -134,41 +132,36 @@ function Chart({ label }: { label: string }) {
   )
 }
 
+function Currency(props: { children: number }) {
+  return (
+    <>
+      {new Intl.NumberFormat("fi-FI", {
+        style: "currency",
+        currency: "EUR",
+
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(props.children)}
+    </>
+  )
+}
+
 interface IScenario {
   dividents: number
   salary: number
   netIncome: number
   taxes: number
+  personalTaxes: number
+  companyTaxes: number
 }
 
 function Heatmap({
   livingExpenses,
-  companyNetWorth,
-  companyProfitEstimate,
+  scenarios,
 }: {
   livingExpenses: number
-  companyNetWorth: number
-  companyProfitEstimate: number
+  scenarios: IScenario[]
 }) {
-  const brackets = [0, 1000, 5000, 10000, 15000, 30000, 40000]
-
-  const scenarios = permutate<number>(brackets, brackets)
-    .filter(
-      ([dividents, salary]) =>
-        salary <= companyProfitEstimate && dividents <= companyNetWorth
-    )
-    .map(([dividents, salary]) => ({
-      dividents,
-      salary,
-      netIncome: getNetIncome(salary, dividents),
-      taxes: getTotalTaxEuroAmount(
-        salary,
-        dividents,
-        companyProfitEstimate - salary
-      ),
-    }))
-    .sort((a, b) => a.taxes - b.taxes)
-
   const top8Cheapest = scenarios.slice(0, 8)
   const top5Expensive = scenarios.slice(-5)
   const mediumTier = scenarios.slice(-15, -5)
@@ -218,23 +211,19 @@ function Heatmap({
 
           return (
             <div className="tooltip">
-              <strong className="tooltip__title">{scenario.netIncome} €</strong>
-              <span>
-                <strong>${scenario.dividents}</strong> osinkoa
-              </span>
+              <strong className="tooltip__title">
+                <Currency>{scenario.taxes}</Currency>
+                <br />
+                veroja
+              </strong>
+              <Currency>{scenario.salary}</Currency> palkkaa
               <br />
-              <span>
-                <strong>${scenario.salary}</strong> palkkaa
-              </span>
-              <br />
-              <span>
-                <strong>${scenario.taxes}</strong> veroja
-              </span>
+              <Currency>{scenario.dividents}</Currency> osinkoa
             </div>
           )
         }}
       />
-      <table>
+      <table className="heatmap-data">
         <tbody>
           {Object.keys(groupedByDividents)
             .sort((a, b) => parseInt(b, 10) - parseInt(a, 10))
@@ -256,8 +245,8 @@ function Heatmap({
             })}
           <tr>
             <td />
-            {brackets.map(bracket => (
-              <th key={bracket}>{formatLabel(bracket)}</th>
+            {Object.values(groupedByDividents)[0].map(({ salary }) => (
+              <th key={salary}>{formatLabel(salary)}</th>
             ))}
           </tr>
         </tbody>
@@ -279,12 +268,45 @@ function Card({
   )
 }
 
+const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
+
 const IndexPage = () => {
   const [state, setState] = useState({
     livingExpenses: 20000,
     companyNetWorth: 100000,
     companyProfitEstimate: 150000,
   })
+
+  const brackets = [0, 0.01, 0.05, 0.1, 0.15, 0.3, 0.5]
+
+  const scenarios = permutate<number>(brackets, brackets)
+    .map(([dividents, salary]) => [
+      roundTo1000(state.companyNetWorth * dividents),
+      roundTo1000(state.companyProfitEstimate * salary),
+    ])
+    .filter(
+      ([dividents, salary]) =>
+        salary <= state.companyProfitEstimate &&
+        dividents <= state.companyNetWorth
+    )
+    .map(([dividents, salary]) => ({
+      dividents,
+      salary,
+      netIncome: getNetIncome(salary, dividents),
+      taxes: getTotalTaxEuroAmount(
+        salary,
+        dividents,
+        state.companyProfitEstimate - salary
+      ),
+      personalTaxes: getPersonalTaxes(salary, dividents),
+      companyTaxes: getCorporateTax(state.companyProfitEstimate - salary),
+    }))
+    .sort((a, b) => a.taxes - b.taxes)
+  const [cheapest] = scenarios
+  const mostExpensive = scenarios[scenarios.length - 1]
+  const [ideal] = scenarios.filter(
+    ({ netIncome }) => netIncome >= state.livingExpenses
+  )
 
   return (
     <div>
@@ -352,11 +374,7 @@ const IndexPage = () => {
           Seuraavasta taulukosta näet verotuksellisesti edullisimman
           vaihtoehdon.
         </p>
-        <Heatmap
-          livingExpenses={state.livingExpenses}
-          companyNetWorth={state.companyNetWorth}
-          companyProfitEstimate={state.companyProfitEstimate}
-        />
+        <Heatmap livingExpenses={state.livingExpenses} scenarios={scenarios} />
       </section>
 
       <section>
@@ -364,31 +382,41 @@ const IndexPage = () => {
         <p>
           Pakollisiin elinkustannuksiisi suhtautettu veroedullisin vaihtoehto
         </p>
-        <Card className="card--ideal" title="paras vaihtoehto">
-          <span className="card__value">15 000€ </span>
+        <Card
+          className="card--ideal"
+          title="paras vaihtoehto nykyisillä elinkustannuksillasi"
+        >
+          <span className="card__value">{ideal.dividents} € </span>
           <span className="card__value-type">osinkoa</span>
           <br />
-          <span className="card__value">15 000€ </span>
+          <span className="card__value">{ideal.salary} € </span>
           <span className="card__value-type">palkkaa</span>
         </Card>
         <p>
-          Alentamalla elinkustannuksiasi <strong>10 000 €</strong>, sinä
-          säästäisit <strong>2546 €</strong> ja yrityksesti{" "}
-          <strong>12 343 €</strong>.
+          Alentamalla elinkustannuksiasi{" "}
+          <strong>{ideal.netIncome - cheapest.netIncome} €</strong>, sinä ja
+          yrityksesi säästäisitte yhteensä{" "}
+          <strong>
+            {ideal.personalTaxes -
+              cheapest.personalTaxes +
+              (ideal.companyTaxes - cheapest.companyTaxes)}{" "}
+            €
+          </strong>
+          .
         </p>
         <div className="cards">
           <Card className="card--cheapest" title="edullisin vaihtoehto">
-            <span className="card__value">15 000€ </span>
+            <span className="card__value">{cheapest.dividents} € </span>
             <span className="card__value-type">osinkoa</span>
             <br />
-            <span className="card__value">15 000€ </span>
+            <span className="card__value">{cheapest.salary} € </span>
             <span className="card__value-type">palkkaa</span>
           </Card>
           <Card className="card--worst" title="kallein vaihtoehto">
-            <span className="card__value">15 000€ </span>
+            <span className="card__value">{mostExpensive.dividents} € </span>
             <span className="card__value-type">osinkoa</span>
             <br />
-            <span className="card__value">15 000€ </span>
+            <span className="card__value">{mostExpensive.salary} € </span>
             <span className="card__value-type">palkkaa</span>
           </Card>
         </div>

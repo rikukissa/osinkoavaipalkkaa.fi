@@ -116,41 +116,41 @@ label {
   display: block;
 }
 
-table {
+.heatmap-data {
   border-spacing: 6px;
   border-collapse: separate;
   align-self: center;
 }
 
-table + label {
+.heatmap-data + label {
   text-align: center;
   display: block;
   margin-left: 32px;
 }
 
-th {
+.heatmap-data th {
   font-size: 13px;
   font-family: "Poppins", sans-serif;
   font-weight: 400;
   padding: 0 4px;
 }
-td:not(:first-child) {
+.heatmap-data td:not(:first-child) {
   background: #efefef;
   border-radius: 9px;
   width: 32px;
   height: 32px;
 }
 
-td.heatmap-cell--high {
+.heatmap-data td.heatmap-cell--high {
   background: #ff553e;
 }
-td.heatmap-cell--medium {
+.heatmap-data td.heatmap-cell--medium {
   background: #ffac05;
 }
-td.heatmap-cell--ideal {
+.heatmap-data td.heatmap-cell--ideal {
   background: #00d388;
 }
-td.heatmap-cell--low {
+.heatmap-data td.heatmap-cell--low {
   background: #b3ffba;
 }
 
@@ -181,6 +181,7 @@ td.heatmap-cell--low {
   font-weight: 500;
   display: block;
   font-size: 20px;
+  margin-bottom: 0.5rem;
 }
 
 /* Card */
@@ -262,4 +263,23 @@ rect {
   .cards {
     display: flex;
   }
+}
+
+.calculation {
+  color: #fff;
+}
+
+.calculation__total {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.calculation__value {
+  text-align: right;
+}
+
+.calculation table {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
