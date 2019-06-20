@@ -246,22 +246,23 @@ rect {
     grid-row-start: 1;
     grid-row-end: 4;
   }
-  section {
+  section,
+  footer {
     max-width: 1000px;
     margin: auto;
   }
   .form-item + .form-item {
     margin-top: 1em;
   }
-  .card {
-    width: 275px;
-    margin-right: 1em;
-  }
-  .card + .card {
-    margin-top: 0rem;
-  }
-  .cards {
+  .calculated {
     display: flex;
+  }
+  .calculated article:first-child {
+  }
+  .calculated article:last-child {
+    width: 400px;
+    flex-shrink: 0;
+    padding-left: 2rem;
   }
 }
 
@@ -282,4 +283,46 @@ rect {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+
+.reference-table {
+  width: 100%;
+  display: none;
+  margin-top: 2rem;
+  border-collapse: collapse;
+}
+
+@media (min-width: 800px) {
+  .reference-table {
+    display: table;
+  }
+}
+
+.reference-table td {
+  padding: 0 1em;
+  text-align: right;
+  font-size: 16px;
+  font-family: "Poppins", sans-serif;
+}
+
+.reference-table th {
+  text-transform: uppercase;
+  font-size: 13px;
+  font-family: "Rubik", sans-serif;
+  padding-bottom: 1em;
+}
+
+.reference-table .ideal {
+  background: linear-gradient(116.5deg, #67e5b8 0%, #50e1ad 100%);
+  color: #38415b;
+}
+.reference-table .cheapest {
+  background: linear-gradient(116.5deg, #f4ddd2 0%, #f0d0c2 100%);
+  color: #38415b;
+}
+
+footer {
+  margin-top: 3rem;
+  font-size: 12px;
+  text-align: center;
 }

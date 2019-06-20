@@ -1,4 +1,5 @@
 import ReactTooltip from "react-tooltip"
+import classnames from "classnames"
 import React, { PropsWithChildren, useRef, useState } from "react"
 
 import SEO from "../components/seo"
@@ -153,10 +154,10 @@ interface IScenario {
   taxes: number
   personalTaxes: number
   companyTaxes: number
+  companyNetWorth: number
 }
 
 function Heatmap({
-  livingExpenses,
   scenarios,
 }: {
   livingExpenses: number
@@ -165,9 +166,7 @@ function Heatmap({
   const top8Cheapest = scenarios.slice(0, 8)
   const top5Expensive = scenarios.slice(-5)
   const mediumTier = scenarios.slice(-15, -5)
-  const [ideal] = scenarios.filter(
-    ({ netIncome }) => netIncome >= livingExpenses
-  )
+  const [cheapest] = scenarios
 
   const groupedByDividents = scenarios.reduce(
     (groups, scenario) => {
@@ -183,7 +182,7 @@ function Heatmap({
     label >= 1000 ? `${label / 1000}k` : label
 
   function getClassName(scenario: IScenario) {
-    if (scenario === ideal) {
+    if (scenario === cheapest) {
       return "heatmap-cell--ideal"
     }
     if (top8Cheapest.includes(scenario)) {
@@ -300,6 +299,11 @@ const IndexPage = () => {
       ),
       personalTaxes: getPersonalTaxes(salary, dividents),
       companyTaxes: getCorporateTax(state.companyProfitEstimate - salary),
+      companyNetWorth:
+        state.companyNetWorth -
+        dividents +
+        (state.companyProfitEstimate - salary) +
+        getCorporateTax(state.companyProfitEstimate - salary),
     }))
     .sort((a, b) => a.taxes - b.taxes)
   const [cheapest] = scenarios
@@ -320,30 +324,20 @@ const IndexPage = () => {
       </section>
       <section>
         <h2>Perustiedot</h2>
-        <p>
-          sd fölsdfk ösldfksö dlkfö lsdölf dsökf öldfsklö sdfklö klsdkölkfds
-        </p>
+
         <form className="details-form">
-          <div className="form-item">
-            <label htmlFor="minimum-income">Pakolliset elinkustannukset</label>
-            <div className="input">
-              <input
-                type="text"
-                value={state.livingExpenses}
-                className="number-input"
-                id="minimum-income"
-              />
-            </div>
-          </div>
-
-          <Chart label="Palkkatulon vaikutus verotukseen" />
-
           <div className="form-item">
             <label htmlFor="company-value">Yrityksen varallisuus</label>
             <div className="input">
               <input
-                value={state.companyNetWorth}
                 type="text"
+                value={state.companyNetWorth}
+                onChange={e =>
+                  setState({
+                    ...state,
+                    companyNetWorth: parseInt(e.target.value, 10),
+                  })
+                }
                 className="number-input"
                 placeholder="100 000"
                 id="company-value"
@@ -357,69 +351,161 @@ const IndexPage = () => {
             </label>
             <div className="input">
               <input
-                value={state.companyProfitEstimate}
                 type="text"
+                value={state.companyProfitEstimate}
+                onChange={e =>
+                  setState({
+                    ...state,
+                    companyProfitEstimate: parseInt(e.target.value, 10),
+                  })
+                }
                 className="number-input"
                 id="profit-prediction"
               />
             </div>
           </div>
+          <div className="form-item">
+            <label htmlFor="minimum-income">Pakolliset elinkustannukset</label>
+            <div className="input">
+              <input
+                type="text"
+                value={state.livingExpenses}
+                onChange={e =>
+                  setState({
+                    ...state,
+                    livingExpenses: parseInt(e.target.value, 10),
+                  })
+                }
+                className="number-input"
+                id="minimum-income"
+              />
+            </div>
+          </div>
+
+          <Chart label="Palkkatulon vaikutus verotukseen" />
         </form>
       </section>
 
-      <section>
-        <h2>Palkan & osingon suhde verotukseen</h2>
-        <p>
-          Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään.
-          Seuraavasta taulukosta näet verotuksellisesti edullisimman
-          vaihtoehdon.
-        </p>
-        <Heatmap livingExpenses={state.livingExpenses} scenarios={scenarios} />
-      </section>
+      <section className="calculated">
+        <article>
+          <h2>Palkan & osingon suhde verotukseen</h2>
+          <p>
+            Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään.
+            Seuraavasta taulukosta näet verotuksellisesti edullisimman
+            vaihtoehdon.
+          </p>
+          <Heatmap
+            livingExpenses={state.livingExpenses}
+            scenarios={scenarios}
+          />
+        </article>
 
+        <article>
+          <h2>Laskelmat</h2>
+          <p>
+            Pakollisiin elinkustannuksiisi suhtautettu veroedullisin vaihtoehto
+          </p>
+          <Card
+            className="card--ideal"
+            title="paras vaihtoehto nykyisillä elinkustannuksillasi"
+          >
+            <span className="card__value">{ideal.dividents} € </span>
+            <span className="card__value-type">osinkoa</span>
+            <br />
+            <span className="card__value">{ideal.salary} € </span>
+            <span className="card__value-type">palkkaa</span>
+          </Card>
+          <p>
+            Alentamalla elinkustannuksiasi{" "}
+            <strong>{ideal.netIncome - cheapest.netIncome} €</strong>, sinä ja
+            yrityksesi säästäisitte yhteensä{" "}
+            <strong>
+              {ideal.personalTaxes -
+                cheapest.personalTaxes +
+                (ideal.companyTaxes - cheapest.companyTaxes)}{" "}
+              €
+            </strong>
+            .
+          </p>
+          <div className="cards">
+            <Card className="card--cheapest" title="edullisin vaihtoehto">
+              <span className="card__value">{cheapest.dividents} € </span>
+              <span className="card__value-type">osinkoa</span>
+              <br />
+              <span className="card__value">{cheapest.salary} € </span>
+              <span className="card__value-type">palkkaa</span>
+            </Card>
+            <Card className="card--worst" title="kallein vaihtoehto">
+              <span className="card__value">{mostExpensive.dividents} € </span>
+              <span className="card__value-type">osinkoa</span>
+              <br />
+              <span className="card__value">{mostExpensive.salary} € </span>
+              <span className="card__value-type">palkkaa</span>
+            </Card>
+          </div>
+        </article>
+      </section>
       <section>
-        <h2>Laskelmat</h2>
-        <p>
-          Pakollisiin elinkustannuksiisi suhtautettu veroedullisin vaihtoehto
-        </p>
-        <Card
-          className="card--ideal"
-          title="paras vaihtoehto nykyisillä elinkustannuksillasi"
-        >
-          <span className="card__value">{ideal.dividents} € </span>
-          <span className="card__value-type">osinkoa</span>
-          <br />
-          <span className="card__value">{ideal.salary} € </span>
-          <span className="card__value-type">palkkaa</span>
-        </Card>
-        <p>
-          Alentamalla elinkustannuksiasi{" "}
-          <strong>{ideal.netIncome - cheapest.netIncome} €</strong>, sinä ja
-          yrityksesi säästäisitte yhteensä{" "}
-          <strong>
-            {ideal.personalTaxes -
-              cheapest.personalTaxes +
-              (ideal.companyTaxes - cheapest.companyTaxes)}{" "}
-            €
-          </strong>
-          .
-        </p>
-        <div className="cards">
-          <Card className="card--cheapest" title="edullisin vaihtoehto">
-            <span className="card__value">{cheapest.dividents} € </span>
-            <span className="card__value-type">osinkoa</span>
-            <br />
-            <span className="card__value">{cheapest.salary} € </span>
-            <span className="card__value-type">palkkaa</span>
-          </Card>
-          <Card className="card--worst" title="kallein vaihtoehto">
-            <span className="card__value">{mostExpensive.dividents} € </span>
-            <span className="card__value-type">osinkoa</span>
-            <br />
-            <span className="card__value">{mostExpensive.salary} € </span>
-            <span className="card__value-type">palkkaa</span>
-          </Card>
-        </div>
+        <h2>Skenaariot</h2>
+        <table className="reference-table">
+          <thead>
+            <tr>
+              <th>Osinkoa</th>
+              <th>Palkkaa</th>
+              <th>Käteen jäävä osuus</th>
+              <th>Yritykselle jäävä netto-omaisuus</th>
+              <th>Yrityksen verotus</th>
+              <th>Henkilökohtainen verotus</th>
+              <th>Veroja yhteensä</th>
+              <th>Omat + yrityksen nettovarat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scenarios
+              .slice(0)
+              .sort(
+                (a, b) =>
+                  a.netIncome / a.companyNetWorth -
+                  b.netIncome / b.companyNetWorth
+              )
+              .map((scenario, i) => (
+                <tr
+                  className={classnames({
+                    cheapest: cheapest === scenario,
+                    ideal: ideal === scenario,
+                  })}
+                  key={i}
+                >
+                  <td>
+                    <Currency>{scenario.dividents}</Currency>
+                  </td>
+                  <td>
+                    <Currency>{scenario.salary}</Currency>
+                  </td>
+                  <td>
+                    <Currency>{scenario.netIncome}</Currency>
+                  </td>
+                  <td>
+                    <Currency>{scenario.companyNetWorth}</Currency>
+                  </td>
+                  <td>
+                    <Currency>{scenario.companyTaxes}</Currency>
+                  </td>
+                  <td>
+                    <Currency>{scenario.personalTaxes}</Currency>
+                  </td>
+                  <td>
+                    <Currency>{scenario.taxes}</Currency>
+                  </td>
+                  <td>
+                    <Currency>
+                      {scenario.netIncome + scenario.companyNetWorth}
+                    </Currency>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </section>
       <section>
         <h2>Lisätietoa?</h2>
@@ -430,6 +516,16 @@ const IndexPage = () => {
           kuukaudessa.
         </p>
       </section>
+
+      <footer>
+        osinkoavaipalkkaa.fi ei ota vastuuta palvelun laskemista tiedoista eikä
+        niiden oikeellisuudesta. Palvelun laskemat luvut ovat kerättyyn
+        aineistoon ja keskiarvioihin perustuvia arvioita. Palvelun käyttäjä
+        kantaa itse vastuun palvelun antamien tietojen hyödyntämisestä.
+        <br />
+        <br />
+        Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.
+      </footer>
     </div>
   )
 }
