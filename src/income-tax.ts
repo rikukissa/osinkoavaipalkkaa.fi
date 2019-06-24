@@ -1,4 +1,9 @@
-export const INCOME_TAX = [
+export interface ITaxBracket {
+  income: number
+  percentage: number
+}
+
+export const INCOME_TAX: ITaxBracket[] = [
   { income: 0, percentage: 8.3 },
   { income: 1000, percentage: 8.3 },
   { income: 2000, percentage: 8.3 },

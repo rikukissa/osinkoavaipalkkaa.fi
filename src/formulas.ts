@@ -1,4 +1,4 @@
-import { INCOME_TAX } from "./income-tax"
+import { INCOME_TAX, ITaxBracket } from "./income-tax"
 
 const f = (a: any[], b: any[]) =>
   [].concat(...a.map(a => b.map(b => [].concat(a, b))))
@@ -11,23 +11,39 @@ export function permutate<T>(
   return b ? permutate(f(a, b), ...c) : a
 }
 
+export interface IScenario {
+  dividents: number
+  salary: number
+  netIncome: number
+  taxes: number
+  personalTaxes: number
+  companyTaxes: number
+  companyNetWorth: number
+  companyTaxPrediction: number
+}
+export function sortByBest(scenarios: IScenario[]) {
+  return [...scenarios].sort(
+    (a, b) =>
+      a.taxes + a.companyTaxPrediction - (b.taxes + b.companyTaxPrediction)
+  )
+}
+
 type TaxPercentage = number
+
+export function getIncomeTaxBracket(grossIncome: number): ITaxBracket {
+  return INCOME_TAX.find((bracket, i) =>
+    INCOME_TAX[i + 1]
+      ? grossIncome >= bracket.income && grossIncome < INCOME_TAX[i + 1].income
+      : grossIncome >= bracket.income
+  )!
+}
 
 /*
  * Ansiotulovero
  */
 
 export function getIncomeTaxEuroAmount(grossIncome: number): TaxPercentage {
-  return (
-    (INCOME_TAX.find((bracket, i) =>
-      INCOME_TAX[i + 1]
-        ? grossIncome >= bracket.income &&
-          grossIncome < INCOME_TAX[i + 1].income
-        : grossIncome >= bracket.income
-    ).percentage /
-      100) *
-    grossIncome
-  )
+  return (getIncomeTaxBracket(grossIncome).percentage / 100) * grossIncome
 }
 
 /*

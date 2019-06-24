@@ -1,7 +1,10 @@
 import ReactTooltip from "react-tooltip"
-import classnames from "classnames"
-import React, { PropsWithChildren, useRef, useState } from "react"
-
+import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
+import uniqBy from "lodash/uniqBy"
+import mapValues from "lodash/mapValues"
+import uniq from "lodash/uniq"
+import range from "lodash/range"
+import useLocalStorage from "react-use/lib/useLocalStorage"
 import SEO from "../components/seo"
 import { INCOME_TAX } from "../income-tax"
 import {
@@ -10,6 +13,9 @@ import {
   getNetIncome,
   getPersonalTaxes,
   getCorporateTax,
+  getIncomeTaxBracket,
+  IScenario,
+  sortByBest,
 } from "../formulas"
 import "./index.css"
 
@@ -51,12 +57,12 @@ function PointWithTooltip({
   )
 }
 
-function Chart({ label }: { label: string }) {
+function Chart({ label, ideal }: { label: string; ideal?: IScenario }) {
   const TICKS = INCOME_TAX.length
   const WIDTH = 100
   const HEIGHT = 50
 
-  const points = INCOME_TAX.map(({ income, percentage }, i) => [
+  const points = INCOME_TAX.map(({ percentage }, i) => [
     (WIDTH / TICKS) * (i + 1),
     HEIGHT - percentage / 2,
   ])
@@ -92,6 +98,15 @@ function Chart({ label }: { label: string }) {
             d={`M0 ${HEIGHT} ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
             stroke="#D68560"
           />
+          {ideal && (
+            <path
+              stroke="rgba(50, 175, 181, 0.22)"
+              strokeDasharray="1.5,1.5"
+              strokeWidth="0.3"
+              d={`M${points[INCOME_TAX.indexOf(getIncomeTaxBracket(ideal.salary))][0]} 0 l0 50`}
+            />
+          )}
+
           {points.map(([x, y], i) => (
             <PointWithTooltip
               key={i}
@@ -128,7 +143,7 @@ function Chart({ label }: { label: string }) {
           }}
         />
       </div>
-      <label>Palkkatulon vaikutus verotukseen</label>
+      <label>{label}</label>
     </div>
   )
 }
@@ -147,48 +162,108 @@ function Currency(props: { children: number }) {
   )
 }
 
-interface IScenario {
-  dividents: number
-  salary: number
-  netIncome: number
-  taxes: number
-  personalTaxes: number
-  companyTaxes: number
-  companyNetWorth: number
+interface IScenarioGrid {
+  [key: string]: IScenario[]
+}
+
+function findFromGrid(
+  grid: IScenarioGrid,
+  scenario: IScenario
+): [number, number] | null {
+  const keys = Object.keys(grid)
+  for (const key of keys) {
+    for (const sce of grid[key]) {
+      if (sce === scenario) {
+        return [keys.indexOf(key), grid[key].indexOf(sce)]
+      }
+    }
+  }
+  return null
+}
+
+function createSubgrid(
+  division: number[],
+  grid: IScenarioGrid,
+  scenariosToInclude: IScenario[]
+) {
+  const yCategories = Object.keys(grid)
+
+  const subYCategories = uniq(
+    division
+      .map(percentage =>
+        parseInt(
+          yCategories[Math.floor((yCategories.length - 1) * percentage)],
+          10
+        )
+      )
+      .concat(scenariosToInclude.map(scenario => scenario.dividents))
+  ).sort((a, b) => a - b)
+
+  const xCategories = grid[yCategories[0]]
+  const includedPositions = scenariosToInclude
+    .map(scenario => findFromGrid(grid, scenario)!)
+    .map(([y, x]) => x)
+
+  const subXCategories = uniq(
+    division
+      .map(percentage => Math.floor((xCategories.length - 1) * percentage))
+      .concat(includedPositions)
+  ).sort((a, b) => a - b)
+
+  const newGrid: IScenarioGrid = {}
+
+  for (const category of subYCategories) {
+    newGrid[category] = subXCategories.map(index => grid[category][index])
+  }
+  return newGrid
 }
 
 function Heatmap({
-  scenarios,
+  ideal,
+  cheapest,
+  scenarios: allScenarios,
 }: {
   livingExpenses: number
+  ideal: IScenario
+  cheapest: IScenario
   scenarios: IScenario[]
 }) {
-  const top8Cheapest = scenarios.slice(0, 8)
-  const top5Expensive = scenarios.slice(-5)
-  const mediumTier = scenarios.slice(-15, -5)
-  const [cheapest] = scenarios
-
-  const groupedByDividents = scenarios.reduce(
+  const groupedByDividents = allScenarios.reduce(
     (groups, scenario) => {
       groups[scenario.dividents] = groups[scenario.dividents] || []
       groups[scenario.dividents].push(scenario)
       groups[scenario.dividents].sort((a, b) => a.salary - b.salary)
       return groups
     },
-    {} as { [key: string]: IScenario[] }
+    {} as IScenarioGrid
   )
+
+  const grid = createSubgrid([0, 0.25, 0.5, 0.75, 1], groupedByDividents, [
+    ideal,
+    cheapest,
+  ])
+
+  const scenarios = Object.values(grid).flat()
+
+  const third = Math.floor(scenarios.length * (1 / 3))
+  const cheapTier = scenarios.slice(0, third)
+  const expensiveTier = scenarios.slice(-third)
+  const mediumTier = scenarios.slice(third, third + third)
 
   const formatLabel = (label: number) =>
     label >= 1000 ? `${label / 1000}k` : label
 
   function getClassName(scenario: IScenario) {
-    if (scenario === cheapest) {
+    if (scenario === ideal) {
       return "heatmap-cell--ideal"
     }
-    if (top8Cheapest.includes(scenario)) {
+    if (scenario === cheapest) {
+      return "heatmap-cell--cheapest"
+    }
+    if (cheapTier.includes(scenario)) {
       return "heatmap-cell--low"
     }
-    if (top5Expensive.includes(scenario)) {
+    if (expensiveTier.includes(scenario)) {
       return "heatmap-cell--high"
     }
     if (mediumTier.includes(scenario)) {
@@ -205,8 +280,10 @@ function Heatmap({
             return
           }
           const [dividents, salary] = id.split("-")
-
-          const scenario = groupedByDividents[dividents][parseInt(salary, 10)]
+          if (!grid[dividents]) {
+            return
+          }
+          const scenario = grid[dividents][parseInt(salary, 10)]
 
           return (
             <div className="tooltip">
@@ -224,10 +301,10 @@ function Heatmap({
       />
       <table className="heatmap-data">
         <tbody>
-          {Object.keys(groupedByDividents)
+          {Object.keys(grid)
             .sort((a, b) => parseInt(b, 10) - parseInt(a, 10))
             .map(key => {
-              const sces = groupedByDividents[key]
+              const sces = grid[key]
               return (
                 <tr key={key}>
                   <th>{formatLabel(parseInt(key, 10))}</th>
@@ -244,7 +321,7 @@ function Heatmap({
             })}
           <tr>
             <td />
-            {Object.values(groupedByDividents)[0].map(({ salary }) => (
+            {Object.values(grid)[0].map(({ salary }) => (
               <th key={salary}>{formatLabel(salary)}</th>
             ))}
           </tr>
@@ -270,47 +347,77 @@ function Card({
 const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
 
 const IndexPage = () => {
-  const [state, setState] = useState({
+  const [state, setState] = useLocalStorage("configuration", {
     livingExpenses: 20000,
     companyNetWorth: 100000,
     companyProfitEstimate: 150000,
   })
+  const initialDraftState = { ...mapValues(state, val => val.toString()) }
+  const [draftState, setDraftState] = useState(initialDraftState)
 
-  const brackets = [0, 0.01, 0.05, 0.1, 0.15, 0.3, 0.5]
+  useEffect(() => {
+    const newState: Partial<typeof state> = {}
+    if (draftState === initialDraftState) {
+      return
+    }
+    for (const key of Object.keys(draftState) as Array<
+      keyof (typeof draftState)
+    >) {
+      const value = draftState[key]
+      const parsed = parseInt(value, 10)
+      if (isNaN(parsed)) {
+        return
+      }
+      newState[key] = parsed
+    }
 
-  const scenarios = permutate<number>(brackets, brackets)
-    .map(([dividents, salary]) => [
+    setState(newState as typeof state)
+  }, [draftState])
+
+  const brackets = range(100).map(i => i / 100)
+
+  const permutations = permutate<number>(brackets, brackets).map(
+    ([dividents, salary]) => [
       roundTo1000(state.companyNetWorth * dividents),
       roundTo1000(state.companyProfitEstimate * salary),
-    ])
+    ]
+  )
+
+  const unsortedScenarios = uniqBy(permutations, ([a, b]) => `${a}${b}`)
     .filter(
       ([dividents, salary]) =>
         salary <= state.companyProfitEstimate &&
         dividents <= state.companyNetWorth
     )
-    .map(([dividents, salary]) => ({
-      dividents,
-      salary,
-      netIncome: getNetIncome(salary, dividents),
-      taxes: getTotalTaxEuroAmount(
-        salary,
-        dividents,
-        state.companyProfitEstimate - salary
-      ),
-      personalTaxes: getPersonalTaxes(salary, dividents),
-      companyTaxes: getCorporateTax(state.companyProfitEstimate - salary),
-      companyNetWorth:
+    .map(([dividents, salary]) => {
+      const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
+      const companyNetWorth =
         state.companyNetWorth -
         dividents +
         (state.companyProfitEstimate - salary) +
-        getCorporateTax(state.companyProfitEstimate - salary),
-    }))
-    .sort((a, b) => a.taxes - b.taxes)
+        companyTaxes
+
+      return {
+        dividents,
+        salary,
+        netIncome: getNetIncome(salary, dividents),
+        taxes: getTotalTaxEuroAmount(
+          salary,
+          dividents,
+          state.companyProfitEstimate - salary
+        ),
+        personalTaxes: getPersonalTaxes(salary, dividents),
+        companyTaxes,
+        companyNetWorth,
+        companyTaxPrediction: companyNetWorth * 0.25 * 0.3,
+      }
+    })
+  const scenarios = sortByBest(unsortedScenarios)
   const [cheapest] = scenarios
   const mostExpensive = scenarios[scenarios.length - 1]
-  const [ideal] = scenarios.filter(
-    ({ netIncome }) => netIncome >= state.livingExpenses
-  )
+  const ideal =
+    scenarios.filter(({ netIncome }) => netIncome >= state.livingExpenses)[0] ||
+    cheapest
 
   return (
     <div>
@@ -331,11 +438,11 @@ const IndexPage = () => {
             <div className="input">
               <input
                 type="text"
-                value={state.companyNetWorth}
+                value={draftState.companyNetWorth}
                 onChange={e =>
-                  setState({
-                    ...state,
-                    companyNetWorth: parseInt(e.target.value, 10),
+                  setDraftState({
+                    ...draftState,
+                    companyNetWorth: e.target.value,
                   })
                 }
                 className="number-input"
@@ -352,11 +459,11 @@ const IndexPage = () => {
             <div className="input">
               <input
                 type="text"
-                value={state.companyProfitEstimate}
+                value={draftState.companyProfitEstimate}
                 onChange={e =>
-                  setState({
-                    ...state,
-                    companyProfitEstimate: parseInt(e.target.value, 10),
+                  setDraftState({
+                    ...draftState,
+                    companyProfitEstimate: e.target.value,
                   })
                 }
                 className="number-input"
@@ -369,11 +476,11 @@ const IndexPage = () => {
             <div className="input">
               <input
                 type="text"
-                value={state.livingExpenses}
+                value={draftState.livingExpenses}
                 onChange={e =>
-                  setState({
-                    ...state,
-                    livingExpenses: parseInt(e.target.value, 10),
+                  setDraftState({
+                    ...draftState,
+                    livingExpenses: e.target.value,
                   })
                 }
                 className="number-input"
@@ -382,7 +489,7 @@ const IndexPage = () => {
             </div>
           </div>
 
-          <Chart label="Palkkatulon vaikutus verotukseen" />
+          <Chart ideal={ideal} label="Palkkatulon vaikutus verotukseen" />
         </form>
       </section>
 
@@ -396,6 +503,8 @@ const IndexPage = () => {
           </p>
           <Heatmap
             livingExpenses={state.livingExpenses}
+            cheapest={cheapest}
+            ideal={ideal}
             scenarios={scenarios}
           />
         </article>
@@ -445,68 +554,59 @@ const IndexPage = () => {
           </div>
         </article>
       </section>
-      <section>
+      {/* <section>
         <h2>Skenaariot</h2>
         <table className="reference-table">
           <thead>
             <tr>
               <th>Osinkoa</th>
               <th>Palkkaa</th>
-              <th>Käteen jäävä osuus</th>
               <th>Yritykselle jäävä netto-omaisuus</th>
-              <th>Yrityksen verotus</th>
+              <th>Yhteisövero</th>
               <th>Henkilökohtainen verotus</th>
+              <th>Käteen jäävä osuus</th>
               <th>Veroja yhteensä</th>
-              <th>Omat + yrityksen nettovarat</th>
+              <th>Vero-olettama yritykselle jäävästä omaisuudesta</th>
             </tr>
           </thead>
           <tbody>
-            {scenarios
-              .slice(0)
-              .sort(
-                (a, b) =>
-                  a.netIncome / a.companyNetWorth -
-                  b.netIncome / b.companyNetWorth
-              )
-              .map((scenario, i) => (
-                <tr
-                  className={classnames({
-                    cheapest: cheapest === scenario,
-                    ideal: ideal === scenario,
-                  })}
-                  key={i}
-                >
-                  <td>
-                    <Currency>{scenario.dividents}</Currency>
-                  </td>
-                  <td>
-                    <Currency>{scenario.salary}</Currency>
-                  </td>
-                  <td>
-                    <Currency>{scenario.netIncome}</Currency>
-                  </td>
-                  <td>
-                    <Currency>{scenario.companyNetWorth}</Currency>
-                  </td>
-                  <td>
-                    <Currency>{scenario.companyTaxes}</Currency>
-                  </td>
-                  <td>
-                    <Currency>{scenario.personalTaxes}</Currency>
-                  </td>
-                  <td>
-                    <Currency>{scenario.taxes}</Currency>
-                  </td>
-                  <td>
-                    <Currency>
-                      {scenario.netIncome + scenario.companyNetWorth}
-                    </Currency>
-                  </td>
-                </tr>
-              ))}
+            {scenarios.map((scenario, i) => (
+              <tr
+                className={classnames({
+                  cheapest: cheapest === scenario,
+                  ideal: ideal === scenario,
+                })}
+                key={i}
+              >
+                <td>
+                  <Currency>{scenario.dividents}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.salary}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.companyNetWorth}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.companyTaxes}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.personalTaxes}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.netIncome}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.taxes}</Currency>
+                </td>
+                <td>
+                  <Currency>{scenario.companyTaxPrediction}</Currency>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      </section>
+      </section> */}
       <section>
         <h2>Lisätietoa?</h2>
         <p>
