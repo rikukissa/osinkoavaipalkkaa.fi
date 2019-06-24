@@ -1,7 +1,8 @@
 import { INCOME_TAX, ITaxBracket } from "./income-tax"
 
 const f = (a: any[], b: any[]) =>
-  [].concat(...a.map(a => b.map(b => [].concat(a, b))))
+  // @ts-ignore
+  [].concat(...a.map(aItem => b.map(bItem => [].concat(aItem, bItem))))
 
 export function permutate<T>(
   a: any[] | any[],
