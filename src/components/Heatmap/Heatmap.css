@@ -14,6 +14,7 @@
 .heatmap::before {
   content: "osinko";
 }
+
 .heatmap::after {
   content: "palkka";
   text-align: center;
@@ -39,11 +40,37 @@
   font-weight: 400;
   padding: 0 4px;
 }
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 1;
+  }
+}
+
 .heatmap-data td:not(:first-child) {
   background: #efefef;
   border-radius: 9px;
   width: 32px;
   height: 32px;
+  transition: transform 300ms;
+  animation: appear 600ms linear;
+  text-align: center;
+}
+
+.heatmap-data td:not(:first-child):hover {
+  transform: scale(1.1, 1.1);
+}
+
+.heatmap-data td:not(:first-child) svg {
+  fill: #fff;
+  width: 20px;
+  vertical-align: middle;
 }
 
 .heatmap-data td.heatmap-cell--high {
@@ -63,4 +90,8 @@
 }
 .heatmap-data td.heatmap-cell--disabled {
   opacity: 0.5;
+}
+
+.heatmap-data td.heatmap-cell--cheapest svg {
+  vertical-align: -4px;
 }
