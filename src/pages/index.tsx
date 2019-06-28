@@ -321,6 +321,7 @@ const IndexPage = () => {
             Seuraavasta taulukosta näet verotuksellisesti edullisimman
             vaihtoehdon.
           </p>
+
           <Heatmap
             livingExpenses={state.livingExpenses}
             cheapest={cheapest}

@@ -1,6 +1,7 @@
 import ReactTooltip from "react-tooltip"
-import React from "react"
+import React, { useRef, useEffect, useState } from "react"
 import uniq from "lodash/uniq"
+import range from "lodash/range"
 import values from "lodash/values"
 import { IScenario } from "../../formulas"
 import { Currency } from "../Currency"
@@ -72,6 +73,15 @@ export function Heatmap({
   cheapest: IScenario
   scenarios: IScenario[]
 }) {
+  const container = useRef<HTMLDivElement>(null)
+
+  const [size, setSize] = useState(5)
+  useEffect(() => {
+    if (container.current) {
+      setSize(Math.floor(container.current.parentElement!.offsetWidth / 55))
+    }
+  }, [container])
+
   const groupedByDividents = allScenarios.reduce(
     (groups, scenario) => {
       groups[scenario.dividents] = groups[scenario.dividents] || []
@@ -82,17 +92,19 @@ export function Heatmap({
     {} as IScenarioGrid
   )
 
-  const grid = createSubgrid([0, 0.25, 0.5, 0.75, 1], groupedByDividents, [
-    ideal,
-    cheapest,
-  ])
+  const grid = createSubgrid(
+    range(size).map(i => i * (1 / size)),
+    groupedByDividents,
+    [ideal, cheapest]
+  )
 
   const scenarios = values(grid).flat()
 
   const third = Math.floor(scenarios.length * (1 / 3))
   const cheapTier = scenarios.slice(0, third)
-  const expensiveTier = scenarios.slice(-third)
+
   const mediumTier = scenarios.slice(third, third + third)
+  const expensiveTier = scenarios.slice(third + third, scenarios.length)
 
   const formatLabel = (label: number) =>
     label >= 1000 ? `${label / 1000}k` : label
@@ -114,8 +126,9 @@ export function Heatmap({
       return "heatmap-cell--medium"
     }
   }
+
   return (
-    <div className="heatmap">
+    <div ref={container} className="heatmap">
       <ReactTooltip
         id="heatmap"
         effect="solid"
