@@ -134,7 +134,9 @@ label {
   border-radius: 20px;
   padding: 1em 1em;
 }
-
+.card--disabled {
+  opacity: 0.5;
+}
 .card + .card {
   margin-top: 1rem;
 }
@@ -171,7 +173,7 @@ rect {
 
 @media (min-width: 800px) {
   .main {
-    grid-template-columns: 400px auto;
+    grid-template-columns: 420px auto;
     display: grid;
     grid-gap: 4em;
   }

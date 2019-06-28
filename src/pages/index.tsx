@@ -162,9 +162,14 @@ function Card({
   children,
   title,
   className,
-}: PropsWithChildren<{ title: string; className: string }>) {
+  disabled,
+}: PropsWithChildren<{ title: string; className: string; disabled: boolean }>) {
   return (
-    <div className={["card", className].join(" ")}>
+    <div
+      className={["card", className, disabled ? "card--disabled" : ""].join(
+        " "
+      )}
+    >
       <h3 className="card__title">{title}</h3>
 
       {children}
@@ -176,11 +181,13 @@ const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
 
 const IndexPage = () => {
   const [state, setState] = useLocalStorage("configuration", {
-    livingExpenses: 20000,
-    companyNetWorth: 100000,
-    companyProfitEstimate: 150000,
+    livingExpenses: 0,
+    companyNetWorth: 0,
+    companyProfitEstimate: 0,
   })
-  const initialDraftState = { ...mapValues(state, val => val.toString()) }
+  const initialDraftState = {
+    ...mapValues(state, val => (val === 0 ? "" : val.toString())),
+  }
   const [draftState, setDraftState] = useState(initialDraftState)
 
   useEffect(() => {
@@ -201,21 +208,28 @@ const IndexPage = () => {
 
     setState(newState as typeof state)
   }, [draftState])
-
+  const disabled =
+    state.livingExpenses === 0 &&
+    state.companyNetWorth === 0 &&
+    state.companyProfitEstimate === 0
   const brackets = range(100).map(i => i / 100)
 
   const permutations = permutate<number>(brackets, brackets).map(
-    ([dividents, salary]) => [
-      roundTo1000(state.companyNetWorth * dividents),
-      roundTo1000(state.companyProfitEstimate * salary),
-    ]
+    ([dividents, salary]) =>
+      disabled
+        ? [roundTo1000(100000 * dividents), roundTo1000(30000 * salary)]
+        : [
+            roundTo1000(state.companyNetWorth * dividents),
+            roundTo1000(state.companyProfitEstimate * salary),
+          ]
   )
 
   const unsortedScenarios = uniqBy(permutations, ([a, b]) => `${a}${b}`)
-    .filter(
-      ([dividents, salary]) =>
-        salary <= state.companyProfitEstimate &&
-        dividents <= state.companyNetWorth
+    .filter(([dividents, salary]) =>
+      disabled
+        ? true
+        : salary <= state.companyProfitEstimate &&
+          dividents <= state.companyNetWorth
     )
     .map(([dividents, salary]) => {
       const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
@@ -254,24 +268,27 @@ const IndexPage = () => {
         <h1>Osinkoa vai palkkaa?</h1>
         <h2>Ja kuinka paljon?</h2>
         <p>
-          Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?
-          Vaikka palkkatulon verotus onkin Suomessa kovaa, ei palkkaa siltikään
-          kannata jättää kokonaan maksamatta. <br />
-          Osinkoavaipalkkaa.fi auttaa sinua löytämään oikean määrän palkkaa ja
-          osinkoja suhteessa maksettavien verojen määrään.
+          Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?{" "}
+          <strong>Osinkoa vai palkkaa</strong> auttaa sinua löytämään oikean
+          määrän palkkaa ja osinkoja suhteessa maksettavien verojen määrään.
+          Palvelu on tarkoitettu pääasiassa oman osakeyhtiön omistaville
+          freelancereille ja yksityisyrittäjille.
         </p>
       </header>
       <section className="main">
         <form className="details-form">
-          <h2>Perustiedot</h2>
+          <h2>Aloita syöttämällä perustiedot</h2>
           <p>
-            Syötä yrityksesi tiedot sekä rahan määrän, jonka minimissään haluat
-            kotiuttaa tilikauden aikana.
+            Täytä seuraavat 3 kenttää. Näiden tietojen perusteella muodostamme
+            laskemme kaikki mahdolliset skenaariot.
           </p>
           <div className="form-item">
-            <label htmlFor="company-value">Yrityksen varallisuus</label>
+            <label htmlFor="company-value">
+              Yrityksen varallisuus tilikauden alussa
+            </label>
             <div className="input">
               <input
+                autoFocus={true}
                 type="text"
                 value={draftState.companyNetWorth}
                 onChange={e =>
@@ -281,14 +298,14 @@ const IndexPage = () => {
                   })
                 }
                 className="number-input"
-                placeholder="100 000"
+                placeholder="10 000"
                 id="company-value"
               />
             </div>
           </div>
           <div className="form-item">
             <label htmlFor="profit-prediction">
-              Yrityksen nettotulo ennuste
+              Ennuste yrityksen voitosta ilman palkkoja
             </label>
             <div className="input">
               <input
@@ -301,17 +318,19 @@ const IndexPage = () => {
                   })
                 }
                 className="number-input"
+                placeholder="8000"
                 id="profit-prediction"
               />
             </div>
           </div>
           <div className="form-item">
             {" "}
-            <label htmlFor="minimum-income">Pakolliset elinkustannuksesi</label>
+            <label htmlFor="minimum-income">Halutun nettotulon alaraja</label>
             <div className="input">
               <input
                 type="text"
                 value={draftState.livingExpenses}
+                placeholder="5000"
                 onChange={e =>
                   setDraftState({
                     ...draftState,
@@ -322,7 +341,7 @@ const IndexPage = () => {
                 id="minimum-income"
               />
             </div>
-            <Chart ideal={ideal} label="Palkkatulon vaikutus verotukseen" />
+            {/* <Chart ideal={ideal} label="Palkkatulon vaikutus verotukseen" /> */}
           </div>
         </form>
         <main>
@@ -333,6 +352,7 @@ const IndexPage = () => {
             vaihtoehdon.
           </p>
           <Heatmap
+            disabled={disabled}
             livingExpenses={state.livingExpenses}
             cheapest={cheapest}
             ideal={ideal}
@@ -347,6 +367,7 @@ const IndexPage = () => {
             Pakollisiin elinkustannuksiisi suhtautettu veroedullisin vaihtoehto
           </p>
           <Card
+            disabled={disabled}
             className="card--ideal"
             title="paras vaihtoehto nykyisillä elinkustannuksillasi"
           >
@@ -369,14 +390,24 @@ const IndexPage = () => {
             .
           </p>
           <div className="cards">
-            <Card className="card--cheapest" title="edullisin vaihtoehto">
-              <span className="card__value">{cheapest.dividents} € </span>
-              <span className="card__value-type">osinkoa</span>
-              <br />
-              <span className="card__value">{cheapest.salary} € </span>
-              <span className="card__value-type">palkkaa</span>
-            </Card>
-            <Card className="card--worst" title="kallein vaihtoehto">
+            {ideal !== cheapest && (
+              <Card
+                disabled={disabled}
+                className="card--cheapest"
+                title="edullisin vaihtoehto"
+              >
+                <span className="card__value">{cheapest.dividents} € </span>
+                <span className="card__value-type">osinkoa</span>
+                <br />
+                <span className="card__value">{cheapest.salary} € </span>
+                <span className="card__value-type">palkkaa</span>
+              </Card>
+            )}
+            <Card
+              disabled={disabled}
+              className="card--worst"
+              title="kallein vaihtoehto"
+            >
               <span className="card__value">{mostExpensive.dividents} € </span>
               <span className="card__value-type">osinkoa</span>
               <br />

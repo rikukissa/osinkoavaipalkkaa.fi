@@ -66,8 +66,10 @@ function createSubgrid(
 export function Heatmap({
   ideal,
   cheapest,
+  disabled,
   scenarios: allScenarios,
 }: {
+  disabled: boolean
   livingExpenses: number
   ideal: IScenario
   cheapest: IScenario
@@ -78,7 +80,7 @@ export function Heatmap({
   const [size, setSize] = useState(5)
   useEffect(() => {
     if (container.current) {
-      setSize(Math.floor(container.current.parentElement!.offsetWidth / 55))
+      setSize(Math.floor(container.current.parentElement!.offsetWidth / 54))
     }
   }, [container])
 
@@ -129,33 +131,35 @@ export function Heatmap({
 
   return (
     <div ref={container} className="heatmap">
-      <ReactTooltip
-        id="heatmap"
-        effect="solid"
-        getContent={id => {
-          if (!id) {
-            return
-          }
-          const [dividents, salary] = id.split("-")
-          if (!grid[dividents]) {
-            return
-          }
-          const scenario = grid[dividents][parseInt(salary, 10)]
+      {!disabled && (
+        <ReactTooltip
+          id="heatmap"
+          effect="solid"
+          getContent={id => {
+            if (!id) {
+              return
+            }
+            const [dividents, salary] = id.split("-")
+            if (!grid[dividents]) {
+              return
+            }
+            const scenario = grid[dividents][parseInt(salary, 10)]
 
-          return (
-            <div className="tooltip">
-              <strong className="tooltip__title">
-                <Currency>{scenario.taxes}</Currency>
+            return (
+              <div className="tooltip">
+                <strong className="tooltip__title">
+                  <Currency>{scenario.taxes}</Currency>
+                  <br />
+                  veroja
+                </strong>
+                <Currency>{scenario.salary}</Currency> palkkaa
                 <br />
-                veroja
-              </strong>
-              <Currency>{scenario.salary}</Currency> palkkaa
-              <br />
-              <Currency>{scenario.dividents}</Currency> osinkoa
-            </div>
-          )
-        }}
-      />
+                <Currency>{scenario.dividents}</Currency> osinkoa
+              </div>
+            )
+          }}
+        />
+      )}
       <table className="heatmap-data">
         <tbody>
           {Object.keys(grid)
@@ -170,7 +174,10 @@ export function Heatmap({
                       key={key + scenario.salary}
                       data-tip={`${key}-${i}`}
                       data-for="heatmap"
-                      className={getClassName(scenario)}
+                      className={[
+                        getClassName(scenario),
+                        disabled ? "heatmap-cell--disabled" : "",
+                      ].join(" ")}
                     />
                   ))}
                 </tr>

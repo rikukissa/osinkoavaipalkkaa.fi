@@ -1,8 +1,8 @@
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Default Starter`,
-    description: `Kick off your next, great Gatsby project with this default starter. This barebones starter ships with the main Gatsby configuration files you might need.`,
-    author: `@gatsbyjs`,
+    title: `Osinkoa vai palkkaa?`,
+    description: `Osinkoa vai palkkaa auttaa sinua löytämään oikean määrän palkkaa ja osinkoja suhteessa maksettavien verojen määrään.`,
+    author: `Okay codes Oy`,
   },
   plugins: [
     "gatsby-plugin-typescript",

@@ -61,3 +61,6 @@
 .heatmap-data td.heatmap-cell--low {
   background: #b3ffba;
 }
+.heatmap-data td.heatmap-cell--disabled {
+  opacity: 0.5;
+}
