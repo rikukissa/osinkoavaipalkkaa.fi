@@ -30,10 +30,11 @@ h2 {
 }
 
 h1 + h2 {
-  margin-top: 0.5em;
+  margin-top: 0em;
   color: rgba(0, 211, 136, 1);
   font-weight: 400;
   font-family: "Poppins", sans-serif;
+  font-size: 24px;
 }
 
 label {
@@ -86,6 +87,7 @@ label {
 
 .chart {
   margin-bottom: 2em;
+  margin-top: 1em;
 }
 
 .svg-container {
@@ -168,23 +170,25 @@ rect {
 }
 
 @media (min-width: 800px) {
-  .details-form {
+  .main {
+    grid-template-columns: 400px auto;
     display: grid;
-    grid-template-columns: 300px auto;
+    grid-gap: 4em;
+  }
+  /* .details-form {
     grid-gap: 0 2em;
   }
   .form-item {
     grid-column: 1;
   }
+
   .chart {
-    grid-column: 2;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    grid-row-start: 1;
-    grid-row-end: 4;
-  }
+  } */
   section,
+  header,
   footer {
     max-width: 1000px;
     margin: auto;
@@ -194,13 +198,6 @@ rect {
   }
   .calculated {
     display: flex;
-  }
-  .calculated article:first-child {
-  }
-  .calculated article:last-child {
-    width: 400px;
-    flex-shrink: 0;
-    padding-left: 2rem;
   }
 }
 
@@ -279,4 +276,21 @@ footer {
   margin-top: 3rem;
   font-size: 12px;
   text-align: center;
+}
+
+.btn {
+  border: 0;
+  background: linear-gradient(116.5deg, #36dda3 0%, #00d387 100%);
+  padding: 1rem 4rem;
+  border-radius: 25px;
+  color: #fff;
+  margin: auto;
+  margin-top: 1rem;
+  display: block;
+  width: 150px;
+  text-align: center;
+  font-size: 15px;
+  font-family: "Rubik", sans-serif;
+  font-weight: 500;
+  text-decoration: none;
 }

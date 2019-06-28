@@ -63,14 +63,21 @@ function Chart({ label, ideal }: { label: string; ideal?: IScenario }) {
   const TICKS = INCOME_TAX.length
   const WIDTH = 100
   const HEIGHT = 50
+  const tooltip = useRef<ReactTooltip>(null)
 
   const points = INCOME_TAX.map(({ percentage }, i) => [
     (WIDTH / TICKS) * (i + 1),
     HEIGHT - percentage / 2,
   ])
 
+  const hideTooltip = () => {
+    if (tooltip.current) {
+      ;(tooltip.current as any).globalHide()
+    }
+  }
+
   return (
-    <div className="chart">
+    <div className="chart" onMouseLeave={hideTooltip}>
       <div className="svg-container">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -122,6 +129,7 @@ function Chart({ label, ideal }: { label: string; ideal?: IScenario }) {
         <ReactTooltip
           id="chart"
           effect="solid"
+          ref={tooltip}
           getContent={id => {
             if (!id) {
               return
@@ -241,18 +249,25 @@ const IndexPage = () => {
 
   return (
     <div>
-      <section>
+      <header>
         <SEO title="Home" />
         <h1>Osinkoa vai palkkaa?</h1>
         <h2>Ja kuinka paljon?</h2>
         <p>
           Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?
+          Vaikka palkkatulon verotus onkin Suomessa kovaa, ei palkkaa siltikään
+          kannata jättää kokonaan maksamatta. <br />
+          Osinkoavaipalkkaa.fi auttaa sinua löytämään oikean määrän palkkaa ja
+          osinkoja suhteessa maksettavien verojen määrään.
         </p>
-      </section>
-      <section>
-        <h2>Perustiedot</h2>
-
+      </header>
+      <section className="main">
         <form className="details-form">
+          <h2>Perustiedot</h2>
+          <p>
+            Syötä yrityksesi tiedot sekä rahan määrän, jonka minimissään haluat
+            kotiuttaa tilikauden aikana.
+          </p>
           <div className="form-item">
             <label htmlFor="company-value">Yrityksen varallisuus</label>
             <div className="input">
@@ -271,7 +286,6 @@ const IndexPage = () => {
               />
             </div>
           </div>
-
           <div className="form-item">
             <label htmlFor="profit-prediction">
               Yrityksen nettotulo ennuste
@@ -292,7 +306,8 @@ const IndexPage = () => {
             </div>
           </div>
           <div className="form-item">
-            <label htmlFor="minimum-income">Pakolliset elinkustannukset</label>
+            {" "}
+            <label htmlFor="minimum-income">Pakolliset elinkustannuksesi</label>
             <div className="input">
               <input
                 type="text"
@@ -307,29 +322,25 @@ const IndexPage = () => {
                 id="minimum-income"
               />
             </div>
+            <Chart ideal={ideal} label="Palkkatulon vaikutus verotukseen" />
           </div>
-
-          <Chart ideal={ideal} label="Palkkatulon vaikutus verotukseen" />
         </form>
-      </section>
-
-      <section className="calculated">
-        <article>
+        <main>
           <h2>Palkan & osingon suhde verotukseen</h2>
           <p>
             Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään.
             Seuraavasta taulukosta näet verotuksellisesti edullisimman
             vaihtoehdon.
           </p>
-
           <Heatmap
             livingExpenses={state.livingExpenses}
             cheapest={cheapest}
             ideal={ideal}
             scenarios={scenarios}
           />
-        </article>
-
+        </main>
+      </section>
+      <section className="main">
         <article>
           <h2>Laskelmat</h2>
           <p>
@@ -374,6 +385,23 @@ const IndexPage = () => {
             </Card>
           </div>
         </article>
+        <aside>
+          <section>
+            <h2>Lisätietoa?</h2>
+            <p>
+              Haluaisitko saada vieläkin tarkempaa tietoa eri vaihtoehdoista
+              osakeyhtiön palkanmaksuun liittyen? Onko mielessäsi
+              parannusehdotus tai kommentti palveluun liittyen?
+              <a
+                className="btn"
+                href="https://forms.gle/xZovhsW5GDB3J8w39"
+                target="_blank"
+              >
+                Lähetä palautetta
+              </a>
+            </p>
+          </section>
+        </aside>
       </section>
       {/* <section>
         <h2>Skenaariot</h2>
@@ -428,21 +456,13 @@ const IndexPage = () => {
           </tbody>
         </table>
       </section> */}
-      <section>
-        <h2>Lisätietoa?</h2>
-        <p>
-          Osinkoavaipalkkaa.fi PRO tarjoaa sinulle avaimet vero-optimointiin
-          halpaan 1000 € vuosihintaan. Mikäli opiskelijakorttisi on vielä
-          voimassa, alennamme hinnan kuitenkin edulliseen 20 € hintaan
-          kuukaudessa.
-        </p>
-      </section>
 
       <footer>
-        osinkoavaipalkkaa.fi ei ota vastuuta palvelun laskemista tiedoista eikä
-        niiden oikeellisuudesta. Palvelun laskemat luvut ovat kerättyyn
-        aineistoon ja keskiarvioihin perustuvia arvioita. Palvelun käyttäjä
-        kantaa itse vastuun palvelun antamien tietojen hyödyntämisestä.
+        Palvelun laskemat luvut ovat kerättyyn aineistoon ja keskiarvioihin
+        perustuvia suuntaa antavia arvioita. osinkoavaipalkkaa.fi ei ota
+        vastuuta palvelun laskemista tiedoista eikä niiden oikeellisuudesta
+        Palvelun käyttäjä kantaa itse vastuun palvelun antamien tietojen
+        hyödyntämisestä.
         <br />
         <br />
         Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.
