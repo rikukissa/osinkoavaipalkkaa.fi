@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `Osinkoa vai palkkaa?`,
-    description: `Osinkoa vai palkkaa auttaa sinua löytämään oikean määrän palkkaa ja osinkoja suhteessa maksettavien verojen määrään.`,
+    description: `Erityisesti freelancereille ja yksityisyrittäjille suunnattu Osinkoa vai palkkaa auttaa laskemaan optimimäärän palkkaa ja osinkoa suhteessa maksettaviin veroihin`,
     author: `Okay codes Oy`,
   },
   plugins: [
