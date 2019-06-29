@@ -9,6 +9,7 @@ html {
 
 body {
   padding: 2rem 1rem;
+  margin: 0;
 }
 
 h1,
@@ -47,6 +48,9 @@ label {
 .form-item {
   margin-top: 1em;
   margin-bottom: 1em;
+}
+.form-item:nth-of-type(1) {
+  margin-top: calc(1em + 2px);
 }
 
 .form-item + .form-item {
@@ -125,7 +129,6 @@ label {
 }
 
 /* Card */
-
 .card {
   color: #ffffff;
   font-family: "Rubik", sans-serif;
@@ -165,8 +168,23 @@ label {
   color: #38415b;
 }
 
-.card__value-type {
+@media (min-width: 800px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+    display: grid;
+    grid-gap: 1em;
+  }
+  .card {
+    grid-row: 1;
+  }
+  .card + .card {
+    margin: 0;
+  }
+  .cards p {
+    grid-column: 1 / 4;
+  }
 }
+
 rect {
   pointer-events: all;
 }
@@ -177,18 +195,7 @@ rect {
     display: grid;
     grid-gap: 4em;
   }
-  /* .details-form {
-    grid-gap: 0 2em;
-  }
-  .form-item {
-    grid-column: 1;
-  }
 
-  .chart {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  } */
   section,
   header,
   footer {
@@ -201,6 +208,14 @@ rect {
   .calculated {
     display: flex;
   }
+}
+
+.calculations {
+  background: #fafafa;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 1em 1.5em;
+  margin-top: 3em;
 }
 
 .calculation {
@@ -225,8 +240,13 @@ rect {
 .reference-table {
   width: 100%;
   display: none;
-  margin-top: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
   border-collapse: collapse;
+  border-radius: 12px;
+}
+.reference-table--disabled {
+  opacity: 0.5;
 }
 
 @media (min-width: 800px) {
@@ -236,42 +256,63 @@ rect {
 }
 
 .reference-table td {
-  text-align: right;
   font-size: 16px;
   font-family: "Poppins", sans-serif;
+  background: #fff;
 }
+
 .reference-table td,
 .reference-table th {
-  padding-left: 1em;
+  text-align: right;
+  padding: 0.5em 1em;
+  max-width: 100%;
+  white-space: nowrap;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.reference-table td:first-child,
+.reference-table th:first-child {
+  padding-left: 2em;
+}
+.reference-table td:last-child,
+.reference-table th:last-child {
+  padding-right: 2em;
 }
 
 .reference-table th {
+  background: #f2f5f7;
   text-transform: uppercase;
   font-size: 13px;
   font-family: "Rubik", sans-serif;
   font-weight: 500;
   padding-bottom: 0.5em;
-  text-align: right;
-  min-width: 100px;
+  white-space: nowrap;
+  padding: 1.5em 1em;
 }
-.reference-table tbody td:nth-child(6),
+.reference-table th:first-child {
+  border-top-left-radius: 12px;
+}
+.reference-table th:last-child {
+  border-top-right-radius: 12px;
+}
+.reference-table tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+.reference-table tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+.reference-table tr:last-child td {
+  border-bottom: 0;
+}
+/* .reference-table tbody td:nth-child(6),
 .reference-table tbody td:nth-child(7) {
   background: #efefef;
+} */
+.reference-table__tax {
+  font-size: 13px;
 }
-
-.reference-table .ideal {
-  background: linear-gradient(116.5deg, #67e5b8 0%, #50e1ad 100%);
-  color: #38415b;
-}
-.reference-table tbody .ideal td {
-  background: transparent;
-}
-.reference-table .cheapest {
-  background: linear-gradient(116.5deg, #f4ddd2 0%, #f0d0c2 100%);
-  color: #38415b;
-}
-.reference-table tbody .cheapest td {
-  background: transparent;
+.reference-table svg {
+  width: 1em;
 }
 
 footer {
@@ -287,7 +328,7 @@ footer {
   border-radius: 25px;
   color: #fff;
   margin: auto;
-  margin-top: 1rem;
+  margin-top: 2rem;
   display: block;
   width: 150px;
   text-align: center;

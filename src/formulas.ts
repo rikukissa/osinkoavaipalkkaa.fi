@@ -21,6 +21,9 @@ export interface IScenario {
   companyTaxes: number
   companyNetWorth: number
   companyTaxPrediction: number
+  incomeTax: number
+  incomeTaxPercentage: number
+  capitalGainsTax: number
 }
 export function sortByBest(scenarios: IScenario[]) {
   return [...scenarios].sort(
