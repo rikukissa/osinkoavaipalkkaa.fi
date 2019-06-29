@@ -270,7 +270,7 @@ const IndexPage = () => {
   return (
     <div>
       <header>
-        <SEO title="Home" />
+        <SEO />
         <h1>Osinkoa vai palkkaa?</h1>
         <h2>Ja kuinka paljon?</h2>
         <p>
