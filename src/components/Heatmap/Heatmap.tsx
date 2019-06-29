@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState, useLayoutEffect } from "react"
 import uniq from "lodash/uniq"
 import range from "lodash/range"
 import values from "lodash/values"
+import flatten from "lodash/flatten"
 import { IScenario } from "../../formulas"
 import { Currency } from "../Currency"
 import "./Heatmap.css"
@@ -101,7 +102,7 @@ export function Heatmap(props: {
     [ideal, cheapest]
   )
 
-  const scenarios = values(grid).flat()
+  const scenarios = flatten(values(grid))
 
   const third = Math.floor(scenarios.length * (1 / 3))
   const cheapTier = scenarios.slice(0, third)
