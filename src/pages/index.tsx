@@ -588,8 +588,9 @@ const IndexPage = () => {
       </div>
       <footer>
         Palvelun laskemat luvut ovat kerättyyn aineistoon ja keskiarvioihin
-        perustuvia suuntaa antavia arvioita. osinkoavaipalkkaa.fi ei ota
-        vastuuta palvelun laskemista tiedoista eikä niiden oikeellisuudesta
+        perustuvia suuntaa antavia arvioita. <br />
+        osinkoavaipalkkaa.fi ei ota vastuuta palvelun laskemista tiedoista eikä
+        niiden oikeellisuudesta. <br />
         Palvelun käyttäjä kantaa itse vastuun palvelun antamien tietojen
         hyödyntämisestä.
         <br />
