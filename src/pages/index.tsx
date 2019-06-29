@@ -311,7 +311,7 @@ const IndexPage = () => {
           </div>
           <div className="form-item">
             <label htmlFor="profit-prediction">
-              Ennuste yrityksen voitosta ilman palkkoja
+              Ennuste yrityksen voitosta ennen palkkakuluja
             </label>
             <div className="input">
               <input
