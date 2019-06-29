@@ -267,6 +267,8 @@ const IndexPage = () => {
     scenarios.filter(({ netIncome }) => netIncome >= state.livingExpenses)[0] ||
     cheapest
 
+  const nextCheapest = scenarios[scenarios.indexOf(ideal) - 1]
+
   return (
     <div>
       <header>
@@ -370,12 +372,16 @@ const IndexPage = () => {
         <section>
           <article>
             <h2>Laskelmat</h2>
-            <p>Haluamaasi nettotuloon suhtautettu veroedullisin vaihtoehto</p>
+            <p>
+              Seuraavassa syöttämääsi haluttuun nettotulon alarajaan sopivin
+              vaihtoehto, sekä vertailun vuoksi myös halvin ja kallein
+              vaihtoehto.
+            </p>
             <div className="cards">
               <Card
                 disabled={disabled}
                 className="card--ideal"
-                title="paras vaihtoehto haluamallasi nettotulolla"
+                title="sinulle paras vaihtoehto"
               >
                 <span className="card__value">{ideal.dividents} € </span>
                 <span className="card__value-type">osinkoa</span>
@@ -383,18 +389,71 @@ const IndexPage = () => {
                 <span className="card__value">{ideal.salary} € </span>
                 <span className="card__value-type">palkkaa</span>
               </Card>
-              <p>
-                Alentamalla elinkustannuksiasi{" "}
-                <strong>{ideal.netIncome - cheapest.netIncome} €</strong>, sinä
-                ja yrityksesi säästäisitte yhteensä{" "}
-                <strong>
-                  {ideal.personalTaxes -
-                    cheapest.personalTaxes +
-                    (ideal.companyTaxes - cheapest.companyTaxes)}{" "}
-                  €
-                </strong>
-                .
-              </p>
+
+              {(() => {
+                if (scenarios.indexOf(ideal) < 1) {
+                  return null
+                }
+
+                const personalTaxDifference =
+                  ideal.personalTaxes - nextCheapest.personalTaxes
+                const companyTaxDifference =
+                  ideal.companyTaxes - nextCheapest.companyTaxes
+                const totalTaxDifference = ideal.taxes - nextCheapest.taxes
+                const ownText =
+                  personalTaxDifference > 0 ? (
+                    <>
+                      säästäisi omassa verotuksessasi{" "}
+                      <strong>
+                        <Currency>{Math.abs(personalTaxDifference)}</Currency>
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      kasvattaisi omaa verotustasi{" "}
+                      <strong>
+                        <Currency>{Math.abs(personalTaxDifference)}</Currency>
+                      </strong>
+                    </>
+                  )
+
+                const companyText =
+                  companyTaxDifference > 0 ? (
+                    <>
+                      säästäisi yrityksesi verotuksessa{" "}
+                      <strong>
+                        <Currency>{Math.abs(companyTaxDifference)}</Currency>
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      kasvattaisi yrityksesi verotusta{" "}
+                      <strong>
+                        <Currency>{Math.abs(companyTaxDifference)}</Currency>
+                      </strong>
+                    </>
+                  )
+
+                const conjunction =
+                  personalTaxDifference > 0 && companyTaxDifference > 0
+                    ? "ja"
+                    : "mutta"
+
+                return (
+                  <p>
+                    Seuraavaksi halvin vaihtoehto (
+                    <strong>
+                      <Currency>{nextCheapest.netIncome}</Currency>
+                    </strong>{" "}
+                    nettotuloa) {ownText}, {conjunction} {companyText}.
+                    Kokonaisuudessaan rahaa säästyisi noin{" "}
+                    <strong>
+                      <Currency>{totalTaxDifference}</Currency>
+                    </strong>
+                    .
+                  </p>
+                )
+              })()}
               {ideal !== cheapest && (
                 <Card
                   disabled={disabled}
@@ -434,6 +493,7 @@ const IndexPage = () => {
                 <thead>
                   <tr>
                     <th />
+                    <th>Nettotulo</th>
                     <th>Palkkaa</th>
                     <th>Tulovero</th>
                     <th>Osinkoa</th>
@@ -441,12 +501,15 @@ const IndexPage = () => {
 
                     <th>Yhteisövero</th>
 
-                    <th>Nettotulo</th>
                     <th>Veroja yhteensä</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[ideal, cheapest].map((scenario, i) => (
+                  {[
+                    ideal,
+                    ...(nextCheapest ? [nextCheapest] : []),
+                    cheapest,
+                  ].map((scenario, i) => (
                     <tr
                       className={classnames({
                         cheapest: cheapest === scenario,
@@ -475,6 +538,9 @@ const IndexPage = () => {
                         )}
                       </td>
                       <td>
+                        <Currency>{scenario.netIncome}</Currency>
+                      </td>
+                      <td>
                         <Currency>{scenario.salary}</Currency>
                       </td>
                       <td>
@@ -493,9 +559,6 @@ const IndexPage = () => {
 
                       <td>
                         <Currency>{scenario.companyTaxes}</Currency>
-                      </td>
-                      <td>
-                        <Currency>{scenario.netIncome}</Currency>
                       </td>
                       <td>
                         <Currency>{scenario.taxes}</Currency>
