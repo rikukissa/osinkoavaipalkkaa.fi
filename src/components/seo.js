@@ -19,6 +19,8 @@ function SEO({ description, lang, meta }) {
             title
             description
             author
+            siteUrl: url
+            defaultImage: image
           }
         }
       }
@@ -51,12 +53,16 @@ function SEO({ description, lang, meta }) {
           content: `website`,
         },
         {
+          property: `og:image`,
+          content: `${site.siteMetadata.siteUrl}${site.siteMetadata.defaultImage}`,
+        },
+        {
           name: `twitter:card`,
           content: `summary`,
         },
         {
-          name: `twitter:creator`,
-          content: site.siteMetadata.author,
+          property: `twitter:image`,
+          content: `${site.siteMetadata.siteUrl}${site.siteMetadata.defaultImage}`,
         },
         {
           name: `twitter:title`,

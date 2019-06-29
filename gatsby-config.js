@@ -1,8 +1,10 @@
 module.exports = {
   siteMetadata: {
     title: `Osinkoa vai palkkaa?`,
-    description: `Erityisesti freelancereille ja yksityisyrittäjille suunnattu Osinkoa vai palkkaa auttaa laskemaan optimimäärän palkkaa ja osinkoa suhteessa maksettaviin veroihin`,
-    author: `Okay codes Oy`,
+    url: "https://osinkoavaipalkkaa.fi",
+    description: `Erityisesti freelancereille ja yksityisyrittäjille suunnattu "Osinkoa vai palkkaa" auttaa laskemaan optimimäärän palkkaa ja osinkoa suhteessa elinkustannuksiin ja veroihin`,
+    author: ``,
+    image: "/cover.jpg",
   },
   plugins: [
     "gatsby-plugin-typescript",
@@ -20,8 +22,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `gatsby-starter-default`,
-        short_name: `starter`,
+        name: `osinkoavaipalkkaa.fi`,
+        short_name: `osinkoavaipalkkaa`,
         start_url: `/`,
         background_color: `#663399`,
         theme_color: `#663399`,

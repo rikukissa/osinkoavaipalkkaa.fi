@@ -19,7 +19,7 @@ h2 {
 
 h1 {
   font-size: 48px;
-  color: rgba(0, 211, 136, 1);
+  color: #00d880;
   margin: 0;
 }
 
@@ -32,7 +32,7 @@ h2 {
 
 h1 + h2 {
   margin-top: 0em;
-  color: rgba(0, 211, 136, 1);
+  color: #00d880;
   font-weight: 400;
   font-family: "Poppins", sans-serif;
   font-size: 24px;
@@ -145,7 +145,11 @@ label {
 }
 
 .card--ideal {
-  background: linear-gradient(116.5deg, #67e5b8 0%, #50e1ad 100%);
+  background: linear-gradient(
+    116.5deg,
+    hsl(156, 100%, 42%) 0%,
+    hsla(156, 100%, 40%, 1) 100%
+  );
 }
 
 .card--cheapest {
@@ -323,7 +327,11 @@ footer {
 
 .btn {
   border: 0;
-  background: linear-gradient(116.5deg, #36dda3 0%, #00d387 100%);
+  background: linear-gradient(
+    116.5deg,
+    hsl(156, 100%, 42%) 0%,
+    hsla(156, 100%, 40%, 1) 100%
+  );
   padding: 1rem 4rem;
   border-radius: 25px;
   color: #fff;
