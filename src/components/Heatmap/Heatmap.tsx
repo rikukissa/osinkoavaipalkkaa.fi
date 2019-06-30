@@ -133,40 +133,41 @@ export function Heatmap(props: {
 
   return (
     <div ref={container} className="heatmap">
-      <ReactTooltip
-        id="heatmap"
-        effect="solid"
-        getContent={id => {
-          if (!id || disabled) {
-            return
-          }
-          const [dividents, salary] = id.split("-")
+      {typeof window !== "undefined" && (
+        <ReactTooltip
+          id="heatmap"
+          effect="solid"
+          getContent={id => {
+            if (!id || disabled) {
+              return
+            }
+            const [dividents, salary] = id.split("-")
 
-          if (!grid[dividents]) {
-            return
-          }
+            if (!grid[dividents]) {
+              return
+            }
 
-          const scenario = grid[dividents][parseInt(salary, 10)]
+            const scenario = grid[dividents][parseInt(salary, 10)]
 
-          if (!scenario) {
-            return
-          }
+            if (!scenario) {
+              return
+            }
 
-          return (
-            <div className="tooltip">
-              <strong className="tooltip__title">
-                <Currency>{scenario.taxes}</Currency>
+            return (
+              <div className="tooltip">
+                <strong className="tooltip__title">
+                  <Currency>{scenario.taxes}</Currency>
+                  <br />
+                  veroja
+                </strong>
+                <Currency>{scenario.salary}</Currency> palkkaa
                 <br />
-                veroja
-              </strong>
-              <Currency>{scenario.salary}</Currency> palkkaa
-              <br />
-              <Currency>{scenario.dividents}</Currency> osinkoa
-            </div>
-          )
-        }}
-      />
-
+                <Currency>{scenario.dividents}</Currency> osinkoa
+              </div>
+            )
+          }}
+        />
+      )}
       {size && (
         <table className="heatmap-data">
           <tbody>
