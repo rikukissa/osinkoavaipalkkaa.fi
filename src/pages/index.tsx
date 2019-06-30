@@ -181,17 +181,31 @@ function Card({
 }
 
 const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
-
 const IndexPage = () => {
   const [state, setState] = useLocalStorage("configuration", {
     livingExpenses: 0,
     companyNetWorth: 0,
     companyProfitEstimate: 0,
   })
+
   const initialDraftState = {
     ...mapValues(state, val => (val === 0 ? "" : val.toString())),
   }
   const [draftState, setDraftState] = useState(initialDraftState)
+
+  /*
+   * Hack to potentially fix the SSR issue
+   * disabled classes acting oddly after rehydrating the app
+   */
+
+  const [disabled, setDisabled] = useState(false)
+  useEffect(() => {
+    setDisabled(
+      state.livingExpenses === 0 &&
+        state.companyNetWorth === 0 &&
+        state.companyProfitEstimate === 0
+    )
+  }, [state])
 
   useEffect(() => {
     const newState: Partial<typeof state> = {}
@@ -211,10 +225,7 @@ const IndexPage = () => {
 
     setState(newState as typeof state)
   }, [draftState])
-  const disabled =
-    state.livingExpenses === 0 &&
-    state.companyNetWorth === 0 &&
-    state.companyProfitEstimate === 0
+
   const brackets = range(100).map(i => i / 100)
 
   const permutations = permutate<number>(brackets, brackets).map(
