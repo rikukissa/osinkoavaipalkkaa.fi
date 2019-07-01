@@ -608,7 +608,8 @@ const IndexPage = () => {
         hyödyntämisestä.
         <br />
         <br />
-        Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.
+        Käyttäjien palveluun syöttämiä tietoja{" "}
+        <span onClick={() => foo()}>ei</span> kerätä eikä tallenneta.
       </footer>
     </div>
   )
