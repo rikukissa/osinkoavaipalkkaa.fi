@@ -304,7 +304,7 @@ const IndexPage = () => {
           </p>
           <div className="form-item">
             <label htmlFor="company-value">
-              Yrityksen varallisuus tilikauden alussa
+              Yrityksen nettovarallisuus tilikauden alussa
             </label>
             <div className="input">
               <input
@@ -385,9 +385,10 @@ const IndexPage = () => {
           <article>
             <h2>Laskelmat</h2>
             <p>
-              Seuraavassa syöttämääsi haluttuun nettotulon alarajaan sopivin
-              vaihtoehto, sekä vertailun vuoksi myös halvin ja kallein
-              vaihtoehto.
+              Seuraavassa sinulle sopivin vaihtoehto syöttämääsi nettotulon
+              alarajaan suhteutettuna. Mukana vertailun vuoksi myös{" "}
+              {ideal !== cheapest && "verotuksellisesti halvin, sekä"} kaikista
+              kallein vaihtoehto.
             </p>
             <div className="cards">
               <Card
