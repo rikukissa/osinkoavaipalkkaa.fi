@@ -7,6 +7,7 @@ import range from "lodash/range"
 import classnames from "classnames"
 import useLocalStorage from "react-use/lib/useLocalStorage"
 import SEO from "../components/seo"
+import { sendEvent } from "../tags"
 import { Currency } from "../components/Currency"
 import { Heatmap } from "../components/Heatmap/Heatmap"
 import { INCOME_TAX } from "../income-tax"
@@ -223,7 +224,7 @@ const IndexPage = () => {
       }
       newState[key] = parsed
     }
-
+    sendEvent("key-values-configured")
     setState(newState as typeof state)
   }, [draftState])
 

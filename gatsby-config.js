@@ -32,6 +32,16 @@ module.exports = {
       },
     },
     {
+      resolve: `gatsby-plugin-google-tagmanager`,
+      options: {
+        id: "GTM-KSSPFD3",
+
+        // Include GTM in development.
+        // Defaults to false meaning GTM will only be loaded in production.
+        includeInDevelopment: true,
+      },
+    },
+    {
       resolve: "gatsby-plugin-sentry",
       options: {
         dsn: "https://1ec09db06d5b4ed2b0b2bf7e7ff42f01@sentry.io/1494483",
