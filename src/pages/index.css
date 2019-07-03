@@ -59,6 +59,7 @@ label {
 
 .input {
   display: flex;
+  position: relative;
 }
 
 .number-input {
@@ -68,12 +69,27 @@ label {
   border-bottom: 2px solid #eee;
   color: #38415b;
   font-family: "Rubik", sans-serif;
+  text-align: right;
+  padding: 0.5rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 1em;
+}
+.number-input:focus {
+  outline: none;
+  border-bottom: 2px solid #f3ddd1;
 }
 .input::after {
   content: "€";
   font-size: 48px;
   color: #38415b;
   font-family: "Rubik", sans-serif;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: calc(100%);
 }
 
 .number-input::placeholder {

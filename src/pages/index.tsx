@@ -308,7 +308,7 @@ const IndexPage = () => {
             </label>
             <div className="input">
               <input
-                autoFocus={true}
+                autoFocus={window.innerWidth > 800}
                 type="text"
                 value={draftState.companyNetWorth}
                 onChange={e =>
@@ -608,8 +608,7 @@ const IndexPage = () => {
         hyödyntämisestä.
         <br />
         <br />
-        Käyttäjien palveluun syöttämiä tietoja{" "}
-        <span onClick={() => foo()}>ei</span> kerätä eikä tallenneta.
+        Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.
       </footer>
     </div>
   )
