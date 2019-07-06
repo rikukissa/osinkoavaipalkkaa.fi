@@ -309,7 +309,7 @@ const IndexPage = () => {
             </label>
             <div className="input">
               <input
-                autoFocus={window.innerWidth > 800}
+                autoFocus={typeof window !== 'undefined' && window.innerWidth > 800}
                 type="text"
                 value={draftState.companyNetWorth}
                 onChange={e =>
