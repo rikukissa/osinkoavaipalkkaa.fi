@@ -1,5 +1,6 @@
 import ReactTooltip from "react-tooltip"
 import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
+import uniq from "lodash/uniq"
 import uniqBy from "lodash/uniqBy"
 import mapValues from "lodash/mapValues"
 
@@ -539,11 +540,11 @@ const IndexPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {[
+                  {uniq([
                     ideal,
                     ...(nextCheapest ? [nextCheapest] : []),
                     cheapest,
-                  ].map((scenario, i) => (
+                  ]).map((scenario, i) => (
                     <tr
                       className={classnames({
                         cheapest: cheapest === scenario,
