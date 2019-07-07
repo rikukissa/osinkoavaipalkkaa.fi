@@ -188,6 +188,11 @@ const initialState = {
 }
 
 const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
+
+const stateToDraftState = (state: typeof initialState) => ({
+  ...mapValues(state, val => (val === 0 ? "" : val.toString())),
+})
+
 const IndexPage = () => {
   const [storedState, setStoredState] = useLocalStorage(
     "configuration",
@@ -196,32 +201,18 @@ const IndexPage = () => {
 
   const [state, setState] = useState(initialState)
 
-  useEffect(() => {
-    setState(storedState)
-  }, [])
-
-  useEffect(() => {
-    setStoredState(state)
-  }, [state])
-
-  const initialDraftState = {
-    ...mapValues(state, val => (val === 0 ? "" : val.toString())),
-  }
+  const initialDraftState = stateToDraftState(initialState)
   const [draftState, setDraftState] = useState(initialDraftState)
 
-  /*
-   * Hack to potentially fix the SSR issue
-   * disabled classes acting oddly after rehydrating the app
-   */
-
-  const [disabled, setDisabled] = useState(false)
   useEffect(() => {
-    setDisabled(
-      state.livingExpenses === 0 &&
-        state.companyNetWorth === 0 &&
-        state.companyProfitEstimate === 0
-    )
-  }, [state])
+    setState(storedState)
+    setDraftState(stateToDraftState(storedState))
+  }, [])
+
+  const disabled =
+    state.livingExpenses === 0 &&
+    state.companyNetWorth === 0 &&
+    state.companyProfitEstimate === 0
 
   useEffect(() => {
     const newState: Partial<typeof state> = {}
@@ -241,6 +232,7 @@ const IndexPage = () => {
     }
     sendEvent("key-values-configured")
     setState(newState as typeof state)
+    setStoredState(newState as typeof state)
   }, [draftState])
 
   const brackets = range(100).map(i => i / 100)
@@ -289,6 +281,8 @@ const IndexPage = () => {
       }
     })
   const scenarios = sortByBest(unsortedScenarios)
+  // console.log(scenarios)
+
   const [cheapest] = scenarios
   const mostExpensive = scenarios[scenarios.length - 1]
   const ideal =
