@@ -256,32 +256,41 @@ const IndexPage = () => {
     )
     .map(([dividents, salary]) => {
       const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
-      const companyNetWorth =
+      const newCompanyNetWorth =
         state.companyNetWorth -
         dividents +
         (state.companyProfitEstimate - salary) +
         companyTaxes
 
+      const totalSharesInCompany = state.companyNetWorth
+
       return {
         dividents,
         salary,
-        capitalGainsTax: getCapitalGainsTaxEuroAmount(dividents),
+        capitalGainsTax: getCapitalGainsTaxEuroAmount(
+          dividents,
+          totalSharesInCompany
+        ),
         incomeTax: getIncomeTaxEuroAmount(salary),
-        netIncome: getNetIncome(salary, dividents),
+        netIncome: getNetIncome(salary, dividents, totalSharesInCompany),
         incomeTaxPercentage: getIncomeTaxBracket(salary).percentage,
         taxes: getTotalTaxEuroAmount(
           salary,
           dividents,
-          state.companyProfitEstimate - salary
+          state.companyProfitEstimate - salary,
+          totalSharesInCompany
         ),
-        personalTaxes: getPersonalTaxes(salary, dividents),
+        personalTaxes: getPersonalTaxes(
+          salary,
+          dividents,
+          totalSharesInCompany
+        ),
         companyTaxes,
-        companyNetWorth,
-        companyTaxPrediction: companyNetWorth * 0.25 * 0.3,
+        companyNetWorth: newCompanyNetWorth,
+        companyTaxPrediction: newCompanyNetWorth * 0.25 * 0.3,
       }
     })
   const scenarios = sortByBest(unsortedScenarios)
-  // console.log(scenarios)
 
   const [cheapest] = scenarios
   const mostExpensive = scenarios[scenarios.length - 1]

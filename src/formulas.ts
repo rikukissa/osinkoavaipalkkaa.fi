@@ -54,9 +54,22 @@ export function getIncomeTaxEuroAmount(grossIncome: number): TaxPercentage {
  * Pääomatulovero
  */
 
-export function getCapitalGainsTaxEuroAmount(capitalGains: number) {
-  const over30kPart = Math.max(0, capitalGains - 30000)
-  return (capitalGains - over30kPart) * 0.3 + over30kPart * 0.34
+export function getCapitalGainsTaxEuroAmount(
+  dividents: number,
+  totalSharesInCompany: number
+) {
+  const eightPercentagePart = totalSharesInCompany * 0.08
+  const below8pPart = Math.min(eightPercentagePart, dividents)
+
+  const below150kPart = Math.min(below8pPart, 150000)
+  const over150kPart = Math.max(0, below8pPart - 150000)
+
+  const over8pPart = Math.max(0, dividents - below8pPart)
+
+  const taxable = below150kPart * 0.25 + over150kPart * 0.85 + over8pPart * 0.75
+
+  const over30kPart = Math.max(0, taxable - 30000)
+  return (taxable - over30kPart) * 0.3 + over30kPart * 0.34
 }
 
 /*
@@ -74,26 +87,35 @@ export function getCorporateTax(companyProfit: number) {
 export function getTotalTaxEuroAmount(
   grossIncome: number,
   capitalGains: number,
-  companyProfit: number
+  companyProfit: number,
+  totalSharesInCompany: number
 ) {
   return (
     getIncomeTaxEuroAmount(grossIncome) +
-    getCapitalGainsTaxEuroAmount(capitalGains) +
+    getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany) +
     getCorporateTax(companyProfit)
   )
 }
-export function getNetIncome(grossIncome: number, capitalGains: number) {
+export function getNetIncome(
+  grossIncome: number,
+  capitalGains: number,
+  totalSharesInCompany: number
+) {
   return (
     grossIncome -
     getIncomeTaxEuroAmount(grossIncome) +
     capitalGains -
-    getCapitalGainsTaxEuroAmount(capitalGains)
+    getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany)
   )
 }
 
-export function getPersonalTaxes(grossIncome: number, capitalGains: number) {
+export function getPersonalTaxes(
+  grossIncome: number,
+  capitalGains: number,
+  totalSharesInCompany: number
+) {
   return (
     getIncomeTaxEuroAmount(grossIncome) +
-    getCapitalGainsTaxEuroAmount(capitalGains)
+    getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany)
   )
 }

@@ -6,6 +6,7 @@
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
     "@types/classnames": "^2.2.8",
+    "@types/jest": "^24.0.15",
     "@types/lodash": "^4.14.134",
     "@types/react-tooltip": "^3.9.2",
     "classnames": "^2.2.6",
@@ -21,13 +22,15 @@
     "gatsby-plugin-typescript": "^2.0.15",
     "gatsby-source-filesystem": "^2.0.38",
     "gatsby-transformer-sharp": "^2.1.21",
+    "jest": "^24.8.0",
     "lodash": "^4.17.11",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-helmet": "^5.2.1",
     "react-tooltip": "^3.10.0",
-    "react-use": "^9.7.0"
+    "react-use": "^9.7.0",
+    "ts-jest": "^24.0.2"
   },
   "devDependencies": {
     "@types/react": "^16.8.19",
@@ -50,7 +53,7 @@
     "format": "prettier --write src/**/*.{js,jsx}",
     "start": "npm run develop",
     "serve": "gatsby serve",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\""
+    "test": "jest"
   },
   "repository": {
     "type": "git",
