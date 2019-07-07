@@ -181,13 +181,28 @@ function Card({
   )
 }
 
+const initialState = {
+  livingExpenses: 0,
+  companyNetWorth: 0,
+  companyProfitEstimate: 0,
+}
+
 const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
 const IndexPage = () => {
-  const [state, setState] = useLocalStorage("configuration", {
-    livingExpenses: 0,
-    companyNetWorth: 0,
-    companyProfitEstimate: 0,
-  })
+  const [storedState, setStoredState] = useLocalStorage(
+    "configuration",
+    initialState
+  )
+
+  const [state, setState] = useState(initialState)
+
+  useEffect(() => {
+    setState(storedState)
+  }, [])
+
+  useEffect(() => {
+    setStoredState(state)
+  }, [state])
 
   const initialDraftState = {
     ...mapValues(state, val => (val === 0 ? "" : val.toString())),
@@ -309,7 +324,9 @@ const IndexPage = () => {
             </label>
             <div className="input">
               <input
-                autoFocus={typeof window !== 'undefined' && window.innerWidth > 800}
+                autoFocus={
+                  typeof window !== "undefined" && window.innerWidth > 800
+                }
                 type="text"
                 value={draftState.companyNetWorth}
                 onChange={e =>
