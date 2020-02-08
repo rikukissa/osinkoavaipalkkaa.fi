@@ -119,7 +119,6 @@ label {
 .__react_component_tooltip.type-dark {
   background: #38415b;
   font-family: "Poppins", sans-serif;
-  text-align: center;
   color: #d3d3d3;
   border-radius: 10px;
   padding: 1.5em 1em;
@@ -137,6 +136,7 @@ label {
 }
 
 .tooltip__title {
+  text-align: center;
   font-family: "Rubik", sans-serif;
   font-weight: 500;
   display: block;

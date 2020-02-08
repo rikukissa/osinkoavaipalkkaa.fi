@@ -163,9 +163,14 @@ export function Heatmap(props: {
                 <br />
                 veroja
               </strong>
-              <Currency>{scenario.salary}</Currency> palkkaa
+              <Currency>{scenario.salary}</Currency> bruttopalkkaa (
+              {scenario.incomeTaxPercentage}%)
+              <br />
+              <Currency>{scenario.netSalary}</Currency> nettopalkkaa
               <br />
               <Currency>{scenario.dividents}</Currency> osinkoa
+              <br />
+              <Currency>{scenario.netIncome}</Currency> nettotulo
             </div>
           )
         }}

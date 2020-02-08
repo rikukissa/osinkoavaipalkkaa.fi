@@ -249,12 +249,12 @@ const IndexPage = () => {
   )
 
   const unsortedScenarios = uniqBy(permutations, ([a, b]) => `${a}${b}`)
-    .filter(([dividents, salary]) =>
-      disabled
+    .filter(([dividents, salary]) => {
+      return disabled
         ? true
-        : salary <= state.companyProfitEstimate &&
-          dividents <= state.companyNetWorth
-    )
+        : salary + dividents <=
+            state.companyProfitEstimate + state.companyNetWorth
+    })
     .map(([dividents, salary]) => {
       const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
       const newCompanyNetWorth =
@@ -274,6 +274,7 @@ const IndexPage = () => {
         ),
         incomeTax: getIncomeTaxEuroAmount(salary),
         netIncome: getNetIncome(salary, dividents, totalSharesInCompany),
+        netSalary: salary - getIncomeTaxEuroAmount(salary),
         incomeTaxPercentage: getIncomeTaxBracket(salary).percentage,
         taxes: getTotalTaxEuroAmount(
           salary,
@@ -288,9 +289,12 @@ const IndexPage = () => {
         ),
         companyTaxes,
         companyNetWorth: newCompanyNetWorth,
+        // Jos loppusumman nostaisi pelkkinä osinkoina, maksettaisiin joka kerralla
+        // vähintään 30% 1/4sta nostettavaa osinkomäärää
         companyTaxPrediction: newCompanyNetWorth * 0.25 * 0.3,
       }
     })
+
   const scenarios = sortByBest(unsortedScenarios)
 
   const [cheapest] = scenarios
@@ -596,7 +600,9 @@ const IndexPage = () => {
                         <Currency>{scenario.companyTaxes}</Currency>
                       </td>
                       <td>
-                        <Currency>{scenario.taxes}</Currency>
+                        <strong>
+                          <Currency>{scenario.taxes}</Currency>
+                        </strong>
                       </td>
                     </tr>
                   ))}

@@ -15,6 +15,7 @@ export function permutate<T>(
 export interface IScenario {
   dividents: number
   salary: number
+  netSalary: number
   netIncome: number
   taxes: number
   personalTaxes: number
