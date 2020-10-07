@@ -78,7 +78,7 @@ export function getCapitalGainsTaxEuroAmount(
  */
 
 export function getCorporateTax(companyProfit: number) {
-  return companyProfit * 0.2
+  return Math.max(0, companyProfit * 0.2)
 }
 
 /*

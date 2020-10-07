@@ -244,7 +244,12 @@ const IndexPage = () => {
         ? [roundTo1000(100000 * dividents), roundTo1000(30000 * salary)]
         : [
             roundTo1000(state.companyNetWorth * dividents),
-            roundTo1000(state.companyProfitEstimate * salary),
+            roundTo1000(
+              Math.max(
+                state.companyProfitEstimate * salary,
+                state.companyNetWorth * salary
+              )
+            ),
           ]
   )
 
