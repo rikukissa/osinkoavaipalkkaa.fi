@@ -22,7 +22,7 @@
     "gatsby-source-filesystem": "^2.0.38",
     "gatsby-transformer-sharp": "^2.1.21",
     "jest": "^24.8.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "prop-types": "^15.7.2",
     "puppeteer": "^2.1.1",
     "react": "^16.8.6",
