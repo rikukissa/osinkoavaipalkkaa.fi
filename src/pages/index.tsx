@@ -518,7 +518,7 @@ const IndexPage = () => {
             </div>
           </article>
           <aside>
-            <section>
+            <section className="reference">
               <table
                 className={[
                   "reference-table",
@@ -533,13 +533,7 @@ const IndexPage = () => {
                     <th>Tulovero</th>
                     <th>Osinkoa</th>
                     <th>Pääomatulovero</th>
-
-                    <th>
-                      Yhteisövero
-                      <br />
-                      <small>osingosta</small>
-                    </th>
-
+                    <th>Yhteisövero *</th>
                     <th>Veroja yhteensä</th>
                   </tr>
                 </thead>
@@ -610,6 +604,7 @@ const IndexPage = () => {
                   ))}
                 </tbody>
               </table>
+              <small>* aikaisemmin osingoista maksettu yhteisövero.</small>
             </section>
             <section>
               <h2>Lisätietoa?</h2>
