@@ -99,6 +99,13 @@
 /*
  * Tooltip
  */
+
+.tooltip {
+  font-size: 0.8rem;
+  padding: 0 0.5rem;
+  color: #fff;
+}
+
 .tooltip strong {
   color: #fff;
 }
@@ -111,15 +118,14 @@
   font-size: 20px;
   margin-bottom: 0.5rem;
 }
-.tooltip {
-  padding: 0 1rem;
-  color: #fff;
-}
-.tooltip p {
-  margin-bottom: 0;
-}
+
 .tooltip table {
   border-collapse: collapse;
+}
+
+.tooltip tr:not(:first-child) td,
+.tooltip tr:not(:first-child) th {
+  padding-top: 0.25rem;
 }
 
 .tooltip table td,
@@ -128,21 +134,26 @@
 }
 .tooltip table th {
   color: #fff;
+  padding-bottom: 0.25rem;
 }
 .tooltip table td:not(:first-child) {
-  padding-left: 1rem;
+  padding-left: 2rem;
 }
 .tooltip table td:first-child {
   color: #fff;
 }
 
-.tooltip table tr:nth-last-child(2) td {
-  padding-bottom: 0.25rem;
+.tooltip table tr:nth-child(3) td {
+  padding-bottom: 0.5rem;
 }
 
-.tooltip table tr:last-child td {
-  padding-top: 0.25rem;
+.tooltip tr.tooltip-total td {
+  padding-top: 0.5rem;
   border-top: 1px solid #fff;
+}
+
+.tooltip-total td:first-child {
+  font-weight: bold;
 }
 
 .tooltip strong {
@@ -154,4 +165,8 @@
 }
 .tooltip-tax {
   color: #ff553e;
+}
+
+.tooltip p {
+  margin-bottom: 0;
 }

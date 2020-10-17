@@ -14,6 +14,7 @@ export function permutate<T>(
 
 export interface IScenario {
   dividents: number
+  companyTaxesFromDividents: number
   salary: number
   netSalary: number
   netIncome: number
@@ -26,6 +27,7 @@ export interface IScenario {
   incomeTax: number
   incomeTaxPercentage: number
   capitalGainsTax: number
+  grossIncome: number
 }
 export function sortByBest(scenarios: IScenario[]) {
   return [...scenarios].sort(
@@ -89,13 +91,12 @@ export function getCorporateTax(companyProfit: number) {
 export function getTotalTaxEuroAmount(
   grossIncome: number,
   capitalGains: number,
-  companyProfit: number,
   totalSharesInCompany: number
 ) {
   return (
     getIncomeTaxEuroAmount(grossIncome) +
     getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany) +
-    getCorporateTax(companyProfit)
+    getCorporateTax(capitalGains)
   )
 }
 export function getNetIncome(

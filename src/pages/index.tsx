@@ -272,6 +272,7 @@ const IndexPage = () => {
 
       return {
         dividents,
+        companyTaxesFromDividents: getCorporateTax(dividents),
         salary,
         capitalGainsTax: getCapitalGainsTaxEuroAmount(
           dividents,
@@ -279,14 +280,10 @@ const IndexPage = () => {
         ),
         incomeTax: getIncomeTaxEuroAmount(salary),
         netIncome: getNetIncome(salary, dividents, totalSharesInCompany),
+        grossIncome: salary + dividents,
         netSalary: salary - getIncomeTaxEuroAmount(salary),
         incomeTaxPercentage: getIncomeTaxBracket(salary).percentage,
-        taxes: getTotalTaxEuroAmount(
-          salary,
-          dividents,
-          state.companyProfitEstimate - salary,
-          totalSharesInCompany
-        ),
+        taxes: getTotalTaxEuroAmount(salary, dividents, totalSharesInCompany),
         personalTaxes: getPersonalTaxes(
           salary,
           dividents,

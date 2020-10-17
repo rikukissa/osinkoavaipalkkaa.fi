@@ -189,7 +189,7 @@ export function Heatmap(props: {
                 <thead>
                   <tr>
                     <th />
-                    <th>Määrä</th>
+                    <th>Brutto</th>
                     <th>Vero</th>
                   </tr>
                 </thead>
@@ -204,6 +204,13 @@ export function Heatmap(props: {
                     </td>
                   </tr>
                   <tr>
+                    <td>Yhteisövero *</td>
+                    <td></td>
+                    <td>
+                      <Currency>{scenario.companyTaxesFromDividents}</Currency>
+                    </td>
+                  </tr>
+                  <tr>
                     <td>Palkka ({scenario.incomeTaxPercentage}%)</td>
                     <td>
                       <Currency>{scenario.salary}</Currency>
@@ -214,27 +221,33 @@ export function Heatmap(props: {
                       </Currency>
                     </td>
                   </tr>
-                  <tr>
+                  <tr className="tooltip-total">
                     <td>Yhteensä</td>
+                    <td>
+                      <Currency>{scenario.grossIncome}</Currency>
+                    </td>
+                    <td className="tooltip-tax">
+                      <Currency>{scenario.taxes}</Currency>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Nettosumma</td>
                     <td className="tooltip-profit">
                       <Currency>{scenario.netIncome}</Currency>
                     </td>
-                    <td className="tooltip-tax">
-                      <Currency>{scenario.personalTaxes}</Currency>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>Yrityksen tulos</td>
+                    <td>
+                      <Currency>{scenario.companyProfit}</Currency>
                     </td>
+                    <td></td>
                   </tr>
                 </tbody>
               </table>
               <p>
-                Yrityksen tulos{" "}
-                <strong>
-                  <Currency>{scenario.companyProfit}</Currency>
-                </strong>
-                , josta
-                <br /> yhteisövero{" "}
-                <strong>
-                  <Currency>{scenario.companyTaxes}</Currency>
-                </strong>
+                <small>* aikaisemmin osingoista maksettu yhteisövero</small>
               </p>
             </div>
           )
