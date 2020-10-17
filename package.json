@@ -21,6 +21,7 @@
     "gatsby-plugin-typescript": "^2.0.15",
     "gatsby-source-filesystem": "^2.0.38",
     "gatsby-transformer-sharp": "^2.1.21",
+    "i18next": "^19.8.2",
     "jest": "^24.8.0",
     "lodash": "^4.17.11",
     "prop-types": "^15.7.2",
@@ -28,6 +29,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-helmet": "^5.2.1",
+    "react-i18next": "^11.7.3",
     "react-tooltip": "^4.2.10",
     "react-use": "^9.7.0",
     "ts-jest": "^24.0.2"

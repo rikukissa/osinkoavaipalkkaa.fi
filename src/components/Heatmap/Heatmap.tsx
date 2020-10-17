@@ -7,6 +7,7 @@ import flatten from "lodash/flatten"
 import { IScenario } from "../../formulas"
 import { Currency } from "../Currency"
 import "./Heatmap.css"
+import { useTranslation } from "react-i18next"
 
 interface IScenarioGrid {
   [key: string]: IScenario[]
@@ -81,6 +82,7 @@ export function Heatmap(props: {
   if (typeof window === "undefined") {
     return null
   }
+  const { t } = useTranslation()
 
   const { ideal, cheapest, disabled, scenarios: allScenarios } = props
   const container = useRef<HTMLDivElement>(null)
@@ -189,13 +191,13 @@ export function Heatmap(props: {
                 <thead>
                   <tr>
                     <th />
-                    <th>Brutto</th>
-                    <th>Vero</th>
+                    <th>{t("heatmapGrossLabel")}</th>
+                    <th>{t("heatmapTaxLabel")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Osinko</td>
+                    <td>{t("heatmapDividentLabel")}</td>
                     <td>
                       <Currency>{scenario.dividents}</Currency>
                     </td>
@@ -204,14 +206,17 @@ export function Heatmap(props: {
                     </td>
                   </tr>
                   <tr>
-                    <td>Yhteisövero *</td>
-                    <td></td>
+                    <td>{t("heatmapCompanyTaxLabel")}</td>
+                    <td />
                     <td>
                       <Currency>{scenario.companyTaxesFromDividents}</Currency>
                     </td>
                   </tr>
                   <tr>
-                    <td>Palkka ({scenario.incomeTaxPercentage}%)</td>
+                    <td>
+                      {t("heatmapSalaryLabel")} ({scenario.incomeTaxPercentage}
+                      %)
+                    </td>
                     <td>
                       <Currency>{scenario.salary}</Currency>
                     </td>
@@ -222,7 +227,7 @@ export function Heatmap(props: {
                     </td>
                   </tr>
                   <tr className="tooltip-total">
-                    <td>Yhteensä</td>
+                    <td>{t("heatmapTotalLabel")}</td>
                     <td>
                       <Currency>{scenario.grossIncome}</Currency>
                     </td>
@@ -231,23 +236,23 @@ export function Heatmap(props: {
                     </td>
                   </tr>
                   <tr>
-                    <td>Nettosumma</td>
+                    <td>{t("heatmapNetLabel")}</td>
                     <td className="tooltip-profit">
                       <Currency>{scenario.netIncome}</Currency>
                     </td>
-                    <td></td>
+                    <td />
                   </tr>
                   <tr>
-                    <td>Yrityksen tulos</td>
+                    <td>{t("heatmapCompanyProfit")}</td>
                     <td>
                       <Currency>{scenario.companyProfit}</Currency>
                     </td>
-                    <td></td>
+                    <td />
                   </tr>
                 </tbody>
               </table>
               <p>
-                <small>* aikaisemmin osingoista maksettu yhteisövero</small>
+                <small>{t("heatMapCompanyTaxDescription")}</small>
               </p>
             </div>
           )
