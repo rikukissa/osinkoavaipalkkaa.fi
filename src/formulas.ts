@@ -21,19 +21,14 @@ export interface IScenario {
   taxes: number
   personalTaxes: number
   companyTaxes: number
-  companyNetWorth: number
   companyProfit: number
-  companyTaxPrediction: number
   incomeTax: number
   incomeTaxPercentage: number
   capitalGainsTax: number
   grossIncome: number
 }
 export function sortByBest(scenarios: IScenario[]) {
-  return [...scenarios].sort(
-    (a, b) =>
-      a.taxes + a.companyTaxPrediction - (b.taxes + b.companyTaxPrediction)
-  )
+  return [...scenarios].sort((a, b) => a.taxes - b.taxes)
 }
 
 type TaxPercentage = number
@@ -85,6 +80,14 @@ export function getCorporateTax(companyProfit: number) {
 }
 
 /*
+ * Osingosta maksettu yhteisövero
+ */
+
+export function companyTaxesFromDividents(dividents: number) {
+  return getCorporateTax(dividents / 0.8)
+}
+
+/*
  * Kokonaisverotus
  */
 
@@ -96,7 +99,7 @@ export function getTotalTaxEuroAmount(
   return (
     getIncomeTaxEuroAmount(grossIncome) +
     getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany) +
-    getCorporateTax(capitalGains)
+    companyTaxesFromDividents(capitalGains)
   )
 }
 export function getNetIncome(

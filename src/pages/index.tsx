@@ -23,6 +23,7 @@ import {
   sortByBest,
   getCapitalGainsTaxEuroAmount,
   getIncomeTaxEuroAmount,
+  companyTaxesFromDividents,
 } from "../formulas"
 import "./index.css"
 
@@ -262,17 +263,12 @@ const IndexPage = () => {
     })
     .map(([dividents, salary]) => {
       const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
-      const newCompanyNetWorth =
-        state.companyNetWorth -
-        dividents +
-        (state.companyProfitEstimate - salary) +
-        companyTaxes
 
       const totalSharesInCompany = state.companyNetWorth
 
       return {
         dividents,
-        companyTaxesFromDividents: getCorporateTax(dividents),
+        companyTaxesFromDividents: companyTaxesFromDividents(dividents),
         salary,
         capitalGainsTax: getCapitalGainsTaxEuroAmount(
           dividents,
@@ -290,11 +286,7 @@ const IndexPage = () => {
           totalSharesInCompany
         ),
         companyTaxes,
-        companyNetWorth: newCompanyNetWorth,
         companyProfit: state.companyProfitEstimate - salary,
-        // Jos loppusumman nostaisi pelkkinä osinkoina, maksettaisiin joka kerralla
-        // vähintään 30% 1/4sta nostettavaa osinkomäärää
-        companyTaxPrediction: newCompanyNetWorth * 0.25 * 0.3,
       }
     })
 
