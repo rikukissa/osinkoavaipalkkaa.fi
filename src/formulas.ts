@@ -21,6 +21,7 @@ export interface IScenario {
   personalTaxes: number
   companyTaxes: number
   companyNetWorth: number
+  companyProfit: number
   companyTaxPrediction: number
   incomeTax: number
   incomeTaxPercentage: number

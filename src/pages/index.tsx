@@ -294,6 +294,7 @@ const IndexPage = () => {
         ),
         companyTaxes,
         companyNetWorth: newCompanyNetWorth,
+        companyProfit: state.companyProfitEstimate - salary,
         // Jos loppusumman nostaisi pelkkinä osinkoina, maksettaisiin joka kerralla
         // vähintään 30% 1/4sta nostettavaa osinkomäärää
         companyTaxPrediction: newCompanyNetWorth * 0.25 * 0.3,

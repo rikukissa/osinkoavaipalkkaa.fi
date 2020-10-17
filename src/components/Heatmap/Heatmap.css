@@ -23,22 +23,20 @@
 }
 
 .heatmap-data {
-  border-spacing: 6px;
-  border-collapse: separate;
-  align-self: center;
+  grid-gap: 6px;
+  display: grid;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
-.heatmap-data + label {
-  text-align: center;
-  display: block;
-  margin-left: 32px;
-}
-
-.heatmap-data th {
+.heatmap-data .heatmap-label {
   font-size: 13px;
   font-family: "Poppins", sans-serif;
   font-weight: 400;
   padding: 0 4px;
+  display: grid;
+  justify-content: center;
+  align-items: center;
 }
 
 @keyframes appear {
@@ -53,45 +51,92 @@
   }
 }
 
-.heatmap-data td:not(:first-child) {
-  background: #efefef;
-  border-radius: 9px;
+.heatmap-data .heatmap-cell:not(:first-child) {
   width: 32px;
   height: 32px;
+  background: #efefef;
+  border-radius: 9px;
   transition: transform 300ms;
   animation: appear 600ms linear;
   text-align: center;
+  display: grid;
+  justify-content: center;
+  align-items: center;
 }
 
-.heatmap-data td:not(:first-child):hover {
+.heatmap-data .heatmap-cell:not(:first-child):hover {
   transform: scale(1.1, 1.1);
 }
 
-.heatmap-data td:not(:first-child) svg {
+.heatmap-data .heatmap-cell:not(:first-child) svg {
   fill: #fff;
   width: 20px;
   vertical-align: middle;
 }
 
-.heatmap-data td.heatmap-cell--high {
+.heatmap-data .heatmap-cell.heatmap-cell--high {
   background: #ff553e;
 }
-.heatmap-data td.heatmap-cell--medium {
+.heatmap-data .heatmap-cell.heatmap-cell--medium {
   background: #ffac05;
 }
-.heatmap-data td.heatmap-cell--ideal {
+.heatmap-data .heatmap-cell.heatmap-cell--ideal {
   background: #00d880;
 }
-.heatmap-data td.heatmap-cell--cheapest {
+.heatmap-data .heatmap-cell.heatmap-cell--cheapest {
   background: #f4ddd2;
 }
-.heatmap-data td.heatmap-cell--low {
+.heatmap-data .heatmap-cell.heatmap-cell--low {
   background: #b3ffba;
 }
-.heatmap-data td.heatmap-cell--disabled {
+.heatmap-data .heatmap-cell.heatmap-cell--disabled {
   opacity: 0.5;
 }
-
-.heatmap-data td.heatmap-cell--cheapest svg {
+.heatmap-data .heatmap-cell.heatmap-cell--cheapest svg {
   vertical-align: -4px;
+}
+
+/*
+ * Tooltip
+ */
+.tooltip strong {
+  color: #fff;
+}
+
+.tooltip__title {
+  text-align: center;
+  font-family: "Rubik", sans-serif;
+  font-weight: 500;
+  display: block;
+  font-size: 20px;
+  margin-bottom: 0.5rem;
+}
+.tooltip {
+  padding: 0 1rem;
+}
+.tooltip table {
+  border-collapse: collapse;
+}
+
+.tooltip table td,
+.tooltip table th {
+  text-align: right;
+}
+.tooltip table th {
+  color: #fff;
+}
+.tooltip table td:not(:first-child) {
+  padding-left: 1rem;
+}
+.tooltip table td:first-child {
+  color: #fff;
+}
+
+.tooltip table tr:nth-last-child(2) td {
+  padding-bottom: 0.25rem;
+}
+.tooltip table tr:last-child td {
+  padding-top: 0.25rem;
+  border-top: 1px solid #fff;
+  color: #fff;
 }

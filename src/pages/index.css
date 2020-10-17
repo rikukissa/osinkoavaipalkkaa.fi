@@ -131,19 +131,6 @@ label {
   border-top-color: #38415b;
 }
 
-.tooltip strong {
-  color: #fff;
-}
-
-.tooltip__title {
-  text-align: center;
-  font-family: "Rubik", sans-serif;
-  font-weight: 500;
-  display: block;
-  font-size: 20px;
-  margin-bottom: 0.5rem;
-}
-
 /* Card */
 .card {
   color: #ffffff;

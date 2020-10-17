@@ -2125,13 +2125,6 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-tooltip@^3.9.2":
-  version "3.9.2"
-  resolved "https://registry.yarnpkg.com/@types/react-tooltip/-/react-tooltip-3.9.2.tgz#c46ee03cc8631ec1b130feef02af119dbe3639d2"
-  integrity sha512-nw8yikdyULgQoZWSkMgjMVd7nnrjlnUJc4U8NtuxCmTIloEgQTJpI6O/KrWTBK8cNP67KZy/fGgjZ9rOQsdwBQ==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react@*", "@types/react@^16.8.19":
   version "16.8.19"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.19.tgz#629154ef05e2e1985cdde94477deefd823ad9be3"
@@ -4065,7 +4058,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.5, classnames@^2.2.6:
+classnames@^2.2.6:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
@@ -12621,7 +12614,7 @@ prompts@^2.0.1, prompts@^2.3.2:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -13068,13 +13061,13 @@ react-style-singleton@^2.1.0:
     invariant "^2.2.4"
     tslib "^1.0.0"
 
-react-tooltip@^3.10.0:
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/react-tooltip/-/react-tooltip-3.10.0.tgz#268b5ef519fd8a1369288d1f086f42c90d5da7ef"
-  integrity sha512-GGdxJvM1zSFztkTP7gCQbLTstWr1OOoMpJ5WZUGhimj0nhRY+MPz+92MpEnKmj0cftJ9Pd/M6FfSl0sfzmZWkg==
+react-tooltip@^4.2.10:
+  version "4.2.10"
+  resolved "https://registry.yarnpkg.com/react-tooltip/-/react-tooltip-4.2.10.tgz#ed1a1acd388940c96f4b6309f4fd4dcce5e01bdc"
+  integrity sha512-D7ZLx6/QwpUl0SZRek3IZy/HWpsEEp0v3562tcT8IwZgu8IgV7hY5ZzniTkHyRcuL+IQnljpjj7A7zCgl2+T3w==
   dependencies:
-    classnames "^2.2.5"
-    prop-types "^15.6.0"
+    prop-types "^15.7.2"
+    uuid "^7.0.3"
 
 react-use@^9.7.0:
   version "9.7.0"
@@ -16112,6 +16105,11 @@ uuid@^3.0.0, uuid@^3.0.1, uuid@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
+
+uuid@^7.0.3:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
+  integrity sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==
 
 v8-compile-cache@^1.1.2:
   version "1.1.2"

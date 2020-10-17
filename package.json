@@ -8,7 +8,6 @@
     "@types/classnames": "^2.2.8",
     "@types/jest": "^24.0.15",
     "@types/lodash": "^4.14.134",
-    "@types/react-tooltip": "^3.9.2",
     "classnames": "^2.2.6",
     "gatsby": "^2.11.6",
     "gatsby-image": "^2.1.2",
@@ -29,7 +28,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-helmet": "^5.2.1",
-    "react-tooltip": "^3.10.0",
+    "react-tooltip": "^4.2.10",
     "react-use": "^9.7.0",
     "ts-jest": "^24.0.2"
   },
