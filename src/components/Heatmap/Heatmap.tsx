@@ -36,37 +36,37 @@ function createSubgrid(
 
   const subYCategories = uniq(
     division
-      .map(percentage =>
+      .map((percentage) =>
         parseInt(
           yCategories[Math.floor((yCategories.length - 1) * percentage)],
           10
         )
       )
-      .concat(scenariosToInclude.map(scenario => scenario.dividents))
+      .concat(scenariosToInclude.map((scenario) => scenario.dividents))
   ).sort((a, b) => a - b)
 
   const xCategories = grid[yCategories[0]]
   const includedPositions = scenariosToInclude
-    .map(scenario => findFromGrid(grid, scenario)!)
+    .map((scenario) => findFromGrid(grid, scenario)!)
     .map(([y, x]) => x)
 
   const subXCategories = uniq(
     division
-      .map(percentage => Math.floor((xCategories.length - 1) * percentage))
+      .map((percentage) => Math.floor((xCategories.length - 1) * percentage))
       .concat(includedPositions)
   ).sort((a, b) => a - b)
 
   const newGrid: IScenarioGrid = {}
 
   for (const category of subYCategories) {
-    newGrid[category] = subXCategories.map(index => grid[category][index])
+    newGrid[category] = subXCategories.map((index) => grid[category][index])
   }
   return newGrid
 }
 
 function getGridWidth(grid: IScenarioGrid, screenSizeInColumns: number) {
   return Math.max(
-    ...Object.values(grid).map(row => row.length),
+    ...Object.values(grid).map((row) => row.length),
     screenSizeInColumns
   )
 }
@@ -102,18 +102,15 @@ export function Heatmap(props: {
     setForceRenderKey(forceRenderKey + 1)
   }, [allScenarios])
 
-  const groupedByDividents = allScenarios.reduce(
-    (groups, scenario) => {
-      groups[scenario.dividents] = groups[scenario.dividents] || []
-      groups[scenario.dividents].push(scenario)
-      groups[scenario.dividents].sort((a, b) => a.salary - b.salary)
-      return groups
-    },
-    {} as IScenarioGrid
-  )
+  const groupedByDividents = allScenarios.reduce((groups, scenario) => {
+    groups[scenario.dividents] = groups[scenario.dividents] || []
+    groups[scenario.dividents].push(scenario)
+    groups[scenario.dividents].sort((a, b) => a.salary - b.salary)
+    return groups
+  }, {} as IScenarioGrid)
 
   const grid = createSubgrid(
-    range(size).map(i => i * (1 / size)),
+    range(size).map((i) => i * (1 / size)),
     groupedByDividents,
     [ideal, cheapest]
   )
@@ -158,15 +155,19 @@ export function Heatmap(props: {
           triggerElement,
           tooltipElement
         ) => {
-          const tooltipWidth = tooltipElement?.getBoundingClientRect().width || 0
-          const rightOverflow = Math.max(0, -1 * (window.innerWidth - (left + tooltipWidth)))
+          const tooltipWidth =
+            tooltipElement?.getBoundingClientRect().width || 0
+          const rightOverflow = Math.max(
+            0,
+            -1 * (window.innerWidth - (left + tooltipWidth))
+          )
 
           return {
             top,
             left: Math.max(left - rightOverflow, 0),
           }
         }}
-        getContent={id => {
+        getContent={(id) => {
           if (!id || disabled) {
             return
           }
@@ -214,25 +215,27 @@ export function Heatmap(props: {
                     </td>
                   </tr>
                   <tr>
-                    <td>Yrityksen tulos</td>
-                    <td>
-                      <Currency>{scenario.companyProfit}</Currency>
-                    </td>
-                    <td>
-                      <Currency>{scenario.companyTaxes}</Currency>
-                    </td>
-                  </tr>
-                  <tr>
                     <td>Yhteensä</td>
-                    <td>
+                    <td className="tooltip-profit">
                       <Currency>{scenario.netIncome}</Currency>
                     </td>
-                    <td>
-                      <Currency>{scenario.taxes}</Currency>
+                    <td className="tooltip-tax">
+                      <Currency>{scenario.personalTaxes}</Currency>
                     </td>
                   </tr>
                 </tbody>
               </table>
+              <p>
+                Yrityksen tulos{" "}
+                <strong>
+                  <Currency>{scenario.companyProfit}</Currency>
+                </strong>
+                , josta
+                <br /> yhteisövero{" "}
+                <strong>
+                  <Currency>{scenario.companyTaxes}</Currency>
+                </strong>
+              </p>
             </div>
           )
         }}
@@ -259,7 +262,7 @@ export function Heatmap(props: {
                   <label className="heatmap-label">
                     {formatLabel(parseInt(key, 10))}
                   </label>
-                  {range(rowWidth).map(i => {
+                  {range(rowWidth).map((i) => {
                     const scenario = sces[i]
                     if (!scenario) {
                       return <div key={i} />

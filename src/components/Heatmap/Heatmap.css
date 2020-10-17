@@ -113,6 +113,10 @@
 }
 .tooltip {
   padding: 0 1rem;
+  color: #fff;
+}
+.tooltip p {
+  margin-bottom: 0;
 }
 .tooltip table {
   border-collapse: collapse;
@@ -135,8 +139,19 @@
 .tooltip table tr:nth-last-child(2) td {
   padding-bottom: 0.25rem;
 }
+
 .tooltip table tr:last-child td {
   padding-top: 0.25rem;
   border-top: 1px solid #fff;
+}
+
+.tooltip strong {
   color: #fff;
+}
+
+.tooltip-profit {
+  color: #00d880;
+}
+.tooltip-tax {
+  color: #ff553e;
 }
