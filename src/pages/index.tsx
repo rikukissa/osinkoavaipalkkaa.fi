@@ -440,7 +440,8 @@ const IndexPage = () => {
                 const personalTaxDifference =
                   ideal.personalTaxes - nextCheapest.personalTaxes
                 const companyTaxDifference =
-                  ideal.companyTaxes - nextCheapest.companyTaxes
+                  ideal.companyTaxesFromDividents -
+                  nextCheapest.companyTaxesFromDividents
                 const totalTaxDifference = ideal.taxes - nextCheapest.taxes
                 const ownText =
                   personalTaxDifference > 0 ? (
@@ -462,14 +463,14 @@ const IndexPage = () => {
                 const companyText =
                   companyTaxDifference > 0 ? (
                     <>
-                      säästäisi yrityksesi verotuksessa{" "}
+                      säästäisi osingoista verotettavaa määrää{" "}
                       <strong>
                         <Currency>{Math.abs(companyTaxDifference)}</Currency>
                       </strong>
                     </>
                   ) : (
                     <>
-                      kasvattaisi yrityksesi verotusta{" "}
+                      kasvattaisi osingoista verotettavaa määrää{" "}
                       <strong>
                         <Currency>{Math.abs(companyTaxDifference)}</Currency>
                       </strong>
@@ -541,7 +542,11 @@ const IndexPage = () => {
                     <th>Osinkoa</th>
                     <th>Pääomatulovero</th>
 
-                    <th>Yhteisövero</th>
+                    <th>
+                      Yhteisövero
+                      <br />
+                      <small>osingosta</small>
+                    </th>
 
                     <th>Veroja yhteensä</th>
                   </tr>
@@ -600,7 +605,9 @@ const IndexPage = () => {
                       </td>
 
                       <td>
-                        <Currency>{scenario.companyTaxes}</Currency>
+                        <Currency>
+                          {scenario.companyTaxesFromDividents}
+                        </Currency>
                       </td>
                       <td>
                         <strong>
