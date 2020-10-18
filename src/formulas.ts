@@ -2,7 +2,7 @@ import { INCOME_TAX, ITaxBracket } from "./income-tax"
 
 const f = (a: any[], b: any[]) =>
   // @ts-ignore
-  [].concat(...a.map(aItem => b.map(bItem => [].concat(aItem, bItem))))
+  [].concat(...a.map((aItem) => b.map((bItem) => [].concat(aItem, bItem))))
 
 export function permutate<T>(
   a: any[] | any[],
@@ -14,24 +14,21 @@ export function permutate<T>(
 
 export interface IScenario {
   dividents: number
+  companyTaxesFromDividents: number
   salary: number
   netSalary: number
   netIncome: number
   taxes: number
   personalTaxes: number
   companyTaxes: number
-  companyNetWorth: number
   companyProfit: number
-  companyTaxPrediction: number
   incomeTax: number
   incomeTaxPercentage: number
   capitalGainsTax: number
+  grossIncome: number
 }
 export function sortByBest(scenarios: IScenario[]) {
-  return [...scenarios].sort(
-    (a, b) =>
-      a.taxes + a.companyTaxPrediction - (b.taxes + b.companyTaxPrediction)
-  )
+  return [...scenarios].sort((a, b) => a.taxes - b.taxes)
 }
 
 type TaxPercentage = number
@@ -83,19 +80,26 @@ export function getCorporateTax(companyProfit: number) {
 }
 
 /*
+ * Osingosta maksettu yhteisövero
+ */
+
+export function companyTaxesFromDividents(dividents: number) {
+  return getCorporateTax(dividents / 0.8)
+}
+
+/*
  * Kokonaisverotus
  */
 
 export function getTotalTaxEuroAmount(
   grossIncome: number,
   capitalGains: number,
-  companyProfit: number,
   totalSharesInCompany: number
 ) {
   return (
     getIncomeTaxEuroAmount(grossIncome) +
     getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany) +
-    getCorporateTax(companyProfit)
+    companyTaxesFromDividents(capitalGains)
   )
 }
 export function getNetIncome(

@@ -3,7 +3,14 @@ import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 import uniq from "lodash/uniq"
 import uniqBy from "lodash/uniqBy"
 import mapValues from "lodash/mapValues"
-
+import i18Next from "i18next"
+import {
+  useTranslation,
+  initReactI18next,
+  I18nextProvider,
+  Trans,
+} from "react-i18next"
+import LanguageDetector from "i18next-browser-languagedetector"
 import range from "lodash/range"
 import classnames from "classnames"
 import useLocalStorage from "react-use/lib/useLocalStorage"
@@ -23,8 +30,31 @@ import {
   sortByBest,
   getCapitalGainsTaxEuroAmount,
   getIncomeTaxEuroAmount,
+  companyTaxesFromDividents,
 } from "../formulas"
 import "./index.css"
+import en from "../i18n/en.json"
+import fi from "../i18n/fi.json"
+
+i18Next
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: {
+        translation: en,
+      },
+      fi: {
+        translation: fi,
+      },
+    },
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false,
+    },
+  })
+
+i18Next.languages = ["fi", "en"]
 
 function PointWithTooltip({
   x,
@@ -117,7 +147,9 @@ function Chart({ label, ideal }: { label: string; ideal?: IScenario }) {
               stroke="rgba(50, 175, 181, 0.22)"
               strokeDasharray="1.5,1.5"
               strokeWidth="0.3"
-              d={`M${points[INCOME_TAX.indexOf(getIncomeTaxBracket(ideal.salary))][0]} 0 l0 50`}
+              d={`M${
+                points[INCOME_TAX.indexOf(getIncomeTaxBracket(ideal.salary))][0]
+              } 0 l0 50`}
             />
           )}
 
@@ -135,7 +167,7 @@ function Chart({ label, ideal }: { label: string; ideal?: IScenario }) {
           id="chart"
           effect="solid"
           ref={tooltip}
-          getContent={id => {
+          getContent={(id) => {
             if (!id) {
               return
             }
@@ -191,7 +223,7 @@ const initialState = {
 const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
 
 const stateToDraftState = (state: typeof initialState) => ({
-  ...mapValues(state, val => (val === 0 ? "" : val.toString())),
+  ...mapValues(state, (val) => (val === 0 ? "" : val.toString())),
 })
 
 const IndexPage = () => {
@@ -221,7 +253,7 @@ const IndexPage = () => {
       return
     }
     for (const key of Object.keys(draftState) as Array<
-      keyof (typeof draftState)
+      keyof typeof draftState
     >) {
       const value = draftState[key]
       const parsed = parseInt(value, 10)
@@ -236,21 +268,23 @@ const IndexPage = () => {
     setStoredState(newState as typeof state)
   }, [draftState])
 
-  const brackets = range(100).map(i => i / 100)
+  const brackets = range(100).map((i) => i / 100)
 
-  const permutations = permutate<number>(brackets, brackets).map(
-    ([dividents, salary]) =>
-      disabled
-        ? [roundTo1000(100000 * dividents), roundTo1000(30000 * salary)]
-        : [
-            roundTo1000(state.companyNetWorth * dividents),
-            roundTo1000(
-              Math.max(
-                state.companyProfitEstimate * salary,
-                state.companyNetWorth * salary
-              )
-            ),
-          ]
+  const permutations = permutate<number>(
+    brackets,
+    brackets
+  ).map(([dividents, salary]) =>
+    disabled
+      ? [roundTo1000(100000 * dividents), roundTo1000(30000 * salary)]
+      : [
+          roundTo1000(state.companyNetWorth * dividents),
+          roundTo1000(
+            Math.max(
+              state.companyProfitEstimate * salary,
+              state.companyNetWorth * salary
+            )
+          ),
+        ]
   )
 
   const unsortedScenarios = uniqBy(permutations, ([a, b]) => `${a}${b}`)
@@ -262,16 +296,12 @@ const IndexPage = () => {
     })
     .map(([dividents, salary]) => {
       const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
-      const newCompanyNetWorth =
-        state.companyNetWorth -
-        dividents +
-        (state.companyProfitEstimate - salary) +
-        companyTaxes
 
       const totalSharesInCompany = state.companyNetWorth
 
       return {
         dividents,
+        companyTaxesFromDividents: companyTaxesFromDividents(dividents),
         salary,
         capitalGainsTax: getCapitalGainsTaxEuroAmount(
           dividents,
@@ -279,25 +309,17 @@ const IndexPage = () => {
         ),
         incomeTax: getIncomeTaxEuroAmount(salary),
         netIncome: getNetIncome(salary, dividents, totalSharesInCompany),
+        grossIncome: salary + dividents,
         netSalary: salary - getIncomeTaxEuroAmount(salary),
         incomeTaxPercentage: getIncomeTaxBracket(salary).percentage,
-        taxes: getTotalTaxEuroAmount(
-          salary,
-          dividents,
-          state.companyProfitEstimate - salary,
-          totalSharesInCompany
-        ),
+        taxes: getTotalTaxEuroAmount(salary, dividents, totalSharesInCompany),
         personalTaxes: getPersonalTaxes(
           salary,
           dividents,
           totalSharesInCompany
         ),
         companyTaxes,
-        companyNetWorth: newCompanyNetWorth,
         companyProfit: state.companyProfitEstimate - salary,
-        // Jos loppusumman nostaisi pelkkinä osinkoina, maksettaisiin joka kerralla
-        // vähintään 30% 1/4sta nostettavaa osinkomäärää
-        companyTaxPrediction: newCompanyNetWorth * 0.25 * 0.3,
       }
     })
 
@@ -310,32 +332,35 @@ const IndexPage = () => {
     cheapest
 
   const nextCheapest = scenarios[scenarios.indexOf(ideal) - 1]
+  const { t, i18n } = useTranslation()
+
+  const toggleLanguage = () => {
+    i18n.changeLanguage(i18n.language === "fi" ? "en" : "fi")
+  }
 
   return (
     <div>
-      <header>
+      <header className="header">
         <SEO />
-        <h1>Osinkoa vai palkkaa?</h1>
-        <h2>Ja kuinka paljon?</h2>
-        <p>
-          Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran?{" "}
-          <strong>Osinkoa vai palkkaa</strong> auttaa sinua löytämään oikean
-          määrän palkkaa ja osinkoa suhteessa maksettavien verojen määrään.
-          Palvelu on tarkoitettu pääasiassa oman osakeyhtiön omistaville
-          freelancereille ja yksityisyrittäjille.
-        </p>
+        <div>
+          <h1>{t("title")}</h1>
+          <h2>{t("subtitle")}</h2>
+          <p>
+            <Trans i18nKey="description" />
+          </p>
+        </div>
+        <div className="language-select">
+          <button onClick={() => toggleLanguage()} className="language">
+            {i18n.language === "fi" ? "🇬🇧 In English" : "🇫🇮 Suomeksi"}
+          </button>
+        </div>
       </header>
       <section className="main">
         <form className="details-form">
-          <h2>Aloita syöttämällä perustiedot</h2>
-          <p>
-            Täytä seuraavat 3 kenttää. Näiden tietojen perusteella muodostamme
-            laskemme kaikki mahdolliset skenaariot.
-          </p>
+          <h2>{t("start")}</h2>
+          <p>{t("startHelp")}</p>
           <div className="form-item">
-            <label htmlFor="company-value">
-              Yrityksen nettovarallisuus tilikauden alussa
-            </label>
+            <label htmlFor="company-value">{t("inputsNetFunds")}</label>
             <div className="input">
               <input
                 autoFocus={
@@ -343,7 +368,7 @@ const IndexPage = () => {
                 }
                 type="text"
                 value={draftState.companyNetWorth}
-                onChange={e =>
+                onChange={(e) =>
                   setDraftState({
                     ...draftState,
                     companyNetWorth: e.target.value,
@@ -357,13 +382,13 @@ const IndexPage = () => {
           </div>
           <div className="form-item">
             <label htmlFor="profit-prediction">
-              Ennuste yrityksen voitosta ennen palkkakuluja
+              {t("inputsProfitPredition")}
             </label>
             <div className="input">
               <input
                 type="text"
                 value={draftState.companyProfitEstimate}
-                onChange={e =>
+                onChange={(e) =>
                   setDraftState({
                     ...draftState,
                     companyProfitEstimate: e.target.value,
@@ -377,13 +402,13 @@ const IndexPage = () => {
           </div>
           <div className="form-item">
             {" "}
-            <label htmlFor="minimum-income">Halutun nettotulon alaraja</label>
+            <label htmlFor="minimum-income">{t("inputMinimumIncome")}</label>
             <div className="input">
               <input
                 type="text"
                 value={draftState.livingExpenses}
                 placeholder="5000"
-                onChange={e =>
+                onChange={(e) =>
                   setDraftState({
                     ...draftState,
                     livingExpenses: e.target.value,
@@ -397,12 +422,8 @@ const IndexPage = () => {
           </div>
         </form>
         <main>
-          <h2>Palkan & osingon suhde verotukseen</h2>
-          <p>
-            Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään.
-            Seuraavasta taulukosta näet verotuksellisesti edullisimman
-            vaihtoehdon.
-          </p>
+          <h2>{t("scenariosTitle")}</h2>
+          <p>{t("scenariosDescription")}</p>
           <Heatmap
             disabled={disabled}
             livingExpenses={state.livingExpenses}
@@ -415,24 +436,23 @@ const IndexPage = () => {
       <div className="calculations">
         <section>
           <article>
-            <h2>Laskelmat</h2>
+            <h2>{t("calculationsTitle")}</h2>
             <p>
-              Seuraavassa sinulle sopivin vaihtoehto syöttämääsi nettotulon
-              alarajaan suhteutettuna. Mukana vertailun vuoksi myös{" "}
-              {ideal !== cheapest && "verotuksellisesti halvin, sekä"} kaikista
-              kallein vaihtoehto.
+              {ideal !== cheapest
+                ? t("calculationsDescriptionIdealNotCheapest")
+                : t("calculationsDescriptionIdealCheapest")}
             </p>
             <div className="cards">
               <Card
                 disabled={disabled}
                 className="card--ideal"
-                title="sinulle paras vaihtoehto"
+                title={t("cardBestOption")}
               >
                 <span className="card__value">{ideal.dividents} € </span>
-                <span className="card__value-type">osinkoa</span>
+                <span className="card__value-type">{t("cardDivident")}</span>
                 <br />
                 <span className="card__value">{ideal.salary} € </span>
-                <span className="card__value-type">palkkaa</span>
+                <span className="card__value-type">{t("cardSalary")}</span>
               </Card>
 
               {(() => {
@@ -443,19 +463,20 @@ const IndexPage = () => {
                 const personalTaxDifference =
                   ideal.personalTaxes - nextCheapest.personalTaxes
                 const companyTaxDifference =
-                  ideal.companyTaxes - nextCheapest.companyTaxes
+                  ideal.companyTaxesFromDividents -
+                  nextCheapest.companyTaxesFromDividents
                 const totalTaxDifference = ideal.taxes - nextCheapest.taxes
                 const ownText =
                   personalTaxDifference > 0 ? (
                     <>
-                      säästäisi omassa verotuksessasi{" "}
+                      {t("wouldSaveInTaxes")}{" "}
                       <strong>
                         <Currency>{Math.abs(personalTaxDifference)}</Currency>
                       </strong>
                     </>
                   ) : (
                     <>
-                      kasvattaisi omaa verotustasi{" "}
+                      {t("wouldIncreaseTaxes")}{" "}
                       <strong>
                         <Currency>{Math.abs(personalTaxDifference)}</Currency>
                       </strong>
@@ -465,14 +486,14 @@ const IndexPage = () => {
                 const companyText =
                   companyTaxDifference > 0 ? (
                     <>
-                      säästäisi yrityksesi verotuksessa{" "}
+                      {t("wouldSaveInDividentTax")}{" "}
                       <strong>
                         <Currency>{Math.abs(companyTaxDifference)}</Currency>
                       </strong>
                     </>
                   ) : (
                     <>
-                      kasvattaisi yrityksesi verotusta{" "}
+                      {t("wouldIncreaseDividentTax")}{" "}
                       <strong>
                         <Currency>{Math.abs(companyTaxDifference)}</Currency>
                       </strong>
@@ -481,17 +502,17 @@ const IndexPage = () => {
 
                 const conjunction =
                   personalTaxDifference > 0 && companyTaxDifference > 0
-                    ? "ja"
-                    : "mutta"
+                    ? t("and")
+                    : t("but")
 
                 return (
                   <p>
-                    Seuraavaksi halvin vaihtoehto (
+                    {t("nextCheapest")} (
                     <strong>
                       <Currency>{nextCheapest.netIncome}</Currency>
                     </strong>{" "}
-                    nettotuloa) {ownText}, {conjunction} {companyText}.
-                    Kokonaisuudessaan rahaa säästyisi noin{" "}
+                    {t("netIncome")}) {ownText}, {conjunction} {companyText}.{" "}
+                    {t("inTotalYouWouldSave")}{" "}
                     <strong>
                       <Currency>{totalTaxDifference}</Currency>
                     </strong>
@@ -503,32 +524,32 @@ const IndexPage = () => {
                 <Card
                   disabled={disabled}
                   className="card--cheapest"
-                  title="edullisin vaihtoehto"
+                  title={t("cheapestOption")}
                 >
                   <span className="card__value">{cheapest.dividents} € </span>
-                  <span className="card__value-type">osinkoa</span>
+                  <span className="card__value-type">{t("cardDivident")}</span>
                   <br />
                   <span className="card__value">{cheapest.salary} € </span>
-                  <span className="card__value-type">palkkaa</span>
+                  <span className="card__value-type">{t("cardSalary")}</span>
                 </Card>
               )}
               <Card
                 disabled={disabled}
                 className="card--worst"
-                title="kallein vaihtoehto"
+                title={t("mostExpensiveOption")}
               >
                 <span className="card__value">
                   {mostExpensive.dividents} €{" "}
                 </span>
-                <span className="card__value-type">osinkoa</span>
+                <span className="card__value-type">{t("cardDivident")}</span>
                 <br />
                 <span className="card__value">{mostExpensive.salary} € </span>
-                <span className="card__value-type">palkkaa</span>
+                <span className="card__value-type">{t("cardSalary")}</span>
               </Card>
             </div>
           </article>
           <aside>
-            <section>
+            <section className="reference">
               <table
                 className={[
                   "reference-table",
@@ -538,15 +559,15 @@ const IndexPage = () => {
                 <thead>
                   <tr>
                     <th />
-                    <th>Nettotulo</th>
-                    <th>Palkkaa</th>
-                    <th>Tulovero</th>
-                    <th>Osinkoa</th>
-                    <th>Pääomatulovero</th>
+                    <th>{t("tableNetIncome")}</th>
+                    <th>{t("tableSalary")}</th>
+                    <th>{t("tableIncomeTax")}</th>
+                    <th>{t("tableDivident")}</th>
+                    <th>{t("tableCapitalGainsTax")}</th>
 
-                    <th>Yhteisövero</th>
+                    <th>{t("tableCompanyTax")}</th>
 
-                    <th>Veroja yhteensä</th>
+                    <th>{t("tableTaxesInTotal")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -603,7 +624,9 @@ const IndexPage = () => {
                       </td>
 
                       <td>
-                        <Currency>{scenario.companyTaxes}</Currency>
+                        <Currency>
+                          {scenario.companyTaxesFromDividents}
+                        </Currency>
                       </td>
                       <td>
                         <strong>
@@ -614,19 +637,18 @@ const IndexPage = () => {
                   ))}
                 </tbody>
               </table>
+              <small>{t("tableCorporateTaxDescription")}</small>
             </section>
             <section>
-              <h2>Lisätietoa?</h2>
+              <h2>{t("informationTitle")}</h2>
               <p>
-                Haluaisitko saada vieläkin tarkempaa tietoa eri vaihtoehdoista
-                osakeyhtiön palkanmaksuun liittyen? Onko mielessäsi
-                parannusehdotus tai kommentti palveluun liittyen?
+                {t("informationDescription")}
                 <a
                   className="btn"
                   href="https://forms.gle/xZovhsW5GDB3J8w39"
                   target="_blank"
                 >
-                  Lähetä palautetta
+                  {t("informationFeedbackButton")}
                 </a>
               </p>
             </section>
@@ -634,18 +656,14 @@ const IndexPage = () => {
         </section>
       </div>
       <footer>
-        Palvelun laskemat luvut ovat kerättyyn aineistoon ja keskiarvioihin
-        perustuvia suuntaa antavia arvioita. <br />
-        osinkoavaipalkkaa.fi ei ota vastuuta palvelun laskemista tiedoista eikä
-        niiden oikeellisuudesta. <br />
-        Palvelun käyttäjä kantaa itse vastuun palvelun antamien tietojen
-        hyödyntämisestä.
-        <br />
-        <br />
-        Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.
+        <Trans i18nKey="footer" />
       </footer>
     </div>
   )
 }
 
-export default IndexPage
+export default () => (
+  <I18nextProvider i18n={i18Next}>
+    <IndexPage />
+  </I18nextProvider>
+)

@@ -61,6 +61,21 @@ label {
   display: flex;
   position: relative;
 }
+.header {
+  display: flex;
+}
+
+.language-select {
+  flex-shrink: 0;
+}
+
+.language {
+  border: 0;
+  font: inherit;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+}
 
 .number-input {
   border: 0;
@@ -243,23 +258,23 @@ rect {
   flex-direction: column;
   align-items: flex-end;
 }
-
+.reference {
+  display: none;
+}
+@media (min-width: 800px) {
+  .reference {
+    display: block;
+  }
+}
 .reference-table {
   width: 100%;
-  display: none;
   margin-top: 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
   border-collapse: collapse;
   border-radius: 12px;
 }
 .reference-table--disabled {
   opacity: 0.5;
-}
-
-@media (min-width: 800px) {
-  .reference-table {
-    display: table;
-  }
 }
 
 .reference-table td {

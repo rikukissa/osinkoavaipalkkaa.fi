@@ -7,6 +7,7 @@ import flatten from "lodash/flatten"
 import { IScenario } from "../../formulas"
 import { Currency } from "../Currency"
 import "./Heatmap.css"
+import { useTranslation } from "react-i18next"
 
 interface IScenarioGrid {
   [key: string]: IScenario[]
@@ -81,6 +82,7 @@ export function Heatmap(props: {
   if (typeof window === "undefined") {
     return null
   }
+  const { t } = useTranslation()
 
   const { ideal, cheapest, disabled, scenarios: allScenarios } = props
   const container = useRef<HTMLDivElement>(null)
@@ -146,6 +148,7 @@ export function Heatmap(props: {
 
   return (
     <div ref={container} className="heatmap">
+      <span className="heatmap-legend">{t("heatmapLegendDivident")}</span>
       <ReactTooltip
         id="heatmap"
         effect="solid"
@@ -189,13 +192,13 @@ export function Heatmap(props: {
                 <thead>
                   <tr>
                     <th />
-                    <th>Määrä</th>
-                    <th>Vero</th>
+                    <th>{t("heatmapGrossLabel")}</th>
+                    <th>{t("heatmapTaxLabel")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Osinko</td>
+                    <td>{t("heatmapDividentLabel")}</td>
                     <td>
                       <Currency>{scenario.dividents}</Currency>
                     </td>
@@ -204,7 +207,17 @@ export function Heatmap(props: {
                     </td>
                   </tr>
                   <tr>
-                    <td>Palkka ({scenario.incomeTaxPercentage}%)</td>
+                    <td>{t("heatmapCompanyTaxLabel")}</td>
+                    <td />
+                    <td>
+                      <Currency>{scenario.companyTaxesFromDividents}</Currency>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {t("heatmapSalaryLabel")} ({scenario.incomeTaxPercentage}
+                      %)
+                    </td>
                     <td>
                       <Currency>{scenario.salary}</Currency>
                     </td>
@@ -214,27 +227,33 @@ export function Heatmap(props: {
                       </Currency>
                     </td>
                   </tr>
+                  <tr className="tooltip-total">
+                    <td>{t("heatmapTotalLabel")}</td>
+                    <td>
+                      <Currency>{scenario.grossIncome}</Currency>
+                    </td>
+                    <td className="tooltip-tax">
+                      <Currency>{scenario.taxes}</Currency>
+                    </td>
+                  </tr>
                   <tr>
-                    <td>Yhteensä</td>
+                    <td>{t("heatmapNetLabel")}</td>
                     <td className="tooltip-profit">
                       <Currency>{scenario.netIncome}</Currency>
                     </td>
-                    <td className="tooltip-tax">
-                      <Currency>{scenario.personalTaxes}</Currency>
+                    <td />
+                  </tr>
+                  <tr>
+                    <td>{t("heatmapCompanyProfit")}</td>
+                    <td>
+                      <Currency>{scenario.companyProfit}</Currency>
                     </td>
+                    <td />
                   </tr>
                 </tbody>
               </table>
               <p>
-                Yrityksen tulos{" "}
-                <strong>
-                  <Currency>{scenario.companyProfit}</Currency>
-                </strong>
-                , josta
-                <br /> yhteisövero{" "}
-                <strong>
-                  <Currency>{scenario.companyTaxes}</Currency>
-                </strong>
+                <small>{t("heatMapCompanyTaxDescription")}</small>
               </p>
             </div>
           )
@@ -315,6 +334,7 @@ export function Heatmap(props: {
           ))}
         </div>
       )}
+      <span className="heatmap-legend">{t("heatmapLegendSalary")}</span>
     </div>
   )
 }
