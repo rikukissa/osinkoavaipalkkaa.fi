@@ -70,6 +70,8 @@ i18n.use(initReactI18next).init({
         calculationsDescriptionIdealCheapest:
           "Here you can see your most cost-efficient option based on the minimum net income you inputted. For comparison, you can see the most expensive option.",
         cardBestOption: "best option for you",
+        cheapestOption: "cheapest option",
+        mostExpensiveOption: "most expensive option",
         cardDivident: "dividend",
         cardSalary: "salary",
         wouldSaveInTaxes: "would reduce your personal taxation by",
@@ -133,6 +135,8 @@ i18n.use(initReactI18next).init({
         calculationsDescriptionIdealCheapest:
           "Seuraavassa sinulle sopivin vaihtoehto syöttämääsi nettotulon alarajaan suhteutettuna. Mukana vertailun vuoksi myös kaikista kallein vaihtoehto.",
         cardBestOption: "sinulle paras vaihtoehto",
+        cheapestOption: "halvin vaihtoehto",
+        mostExpensiveOption: "kallein vaihtoehto",
         cardDivident: "osinkoa",
         cardSalary: "palkkaa",
         wouldSaveInTaxes: "säästäisi omassa verotuksessasi",
@@ -629,7 +633,7 @@ const IndexPage = () => {
                 <Card
                   disabled={disabled}
                   className="card--cheapest"
-                  title="edullisin vaihtoehto"
+                  title={t("cheapestOption")}
                 >
                   <span className="card__value">{cheapest.dividents} € </span>
                   <span className="card__value-type">{t("cardDivident")}</span>
@@ -641,7 +645,7 @@ const IndexPage = () => {
               <Card
                 disabled={disabled}
                 className="card--worst"
-                title="kallein vaihtoehto"
+                title={t("mostExpensiveOption")}
               >
                 <span className="card__value">
                   {mostExpensive.dividents} €{" "}
