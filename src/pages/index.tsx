@@ -3,13 +3,14 @@ import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 import uniq from "lodash/uniq"
 import uniqBy from "lodash/uniqBy"
 import mapValues from "lodash/mapValues"
-import i18n from "i18next"
+import i18Next from "i18next"
 import {
   useTranslation,
   initReactI18next,
   I18nextProvider,
   Trans,
 } from "react-i18next"
+import LanguageDetector from "i18next-browser-languagedetector"
 import range from "lodash/range"
 import classnames from "classnames"
 import useLocalStorage from "react-use/lib/useLocalStorage"
@@ -32,150 +33,28 @@ import {
   companyTaxesFromDividents,
 } from "../formulas"
 import "./index.css"
+import en from "../i18n/en.json"
+import fi from "../i18n/fi.json"
 
-i18n.use(initReactI18next).init({
-  resources: {
-    en: {
-      translation: {
-        title: "Dividend or salary?",
-        subtitle: "And how much?",
-        description:
-          "<strong>Osinkoa vai palkkaa</strong> helps you to find the optimal amount of salary and divident in relation to the amount of taxes payable. The service is intended mainly for freelancers and sole proprietors with their own limited company (Oy) in Finland.",
-        start: "Start by entering basic information",
-        startHelp:
-          "Fill the 3 following fields. We calculate all possible scenarios based on this information.",
-        inputsNetFunds: "Company's net assets at the beginning of fiscal year",
-        inputsProfitPredition:
-          "Estimate of company profit without salary expenses",
-        inputMinimumIncome: "The amount of net income you need this year",
-        scenariosTitle:
-          "The relation between salary and divident to taxes payable",
-        scenariosDescription:
-          "The amount of salary and divident you pay have a direct relation to amount of taxes. This chart displays different scenarios and how the numbers affect each other.",
-        heatmapLegendDivident: "divident",
-        heatmapLegendSalary: "salary",
-        heatmapGrossLabel: "Gross",
-        heatmapTaxLabel: "Tax",
-        heatmapDividentLabel: "Dividend",
-        heatmapCompanyTaxLabel: "Corporate tax *",
-        heatmapSalaryLabel: "Salary",
-        heatmapTotalLabel: "Total",
-        heatmapNetLabel: "Net amount",
-        heatmapCompanyProfit: "Company revenue",
-        heatMapCompanyTaxDescription:
-          "* Corporate tax your company has paid from the divident amount.",
-        calculationsTitle: "Calculations",
-        calculationsDescriptionIdealNotCheapest:
-          "Here you can see your most cost-efficient option based on the minimum net income you inputted. For comparison, you can also see the most cheapest and expensive option.",
-        calculationsDescriptionIdealCheapest:
-          "Here you can see your most cost-efficient option based on the minimum net income you inputted. For comparison, you can see the most expensive option.",
-        cardBestOption: "best option for you",
-        cheapestOption: "cheapest option",
-        mostExpensiveOption: "most expensive option",
-        cardDivident: "dividend",
-        cardSalary: "salary",
-        wouldSaveInTaxes: "would reduce your personal taxation by",
-        wouldIncreaseTaxes: "would increase your personal taxation by",
-        wouldSaveInDividentTax: "would reduce taxes paid from divident by",
-        wouldIncreaseDividentTax:
-          "would increase the taxes paid from divident by",
-        and: "and",
-        but: "but",
-        nextCheapest: "The next cheapest option",
-        netIncome: "net income",
-        inTotalYouWouldSave: "Approximate total money saved",
-        tableNetIncome: "Net income",
-        tableSalary: "Salary",
-        tableIncomeTax: "Income tax",
-        tableDivident: "Dividend",
-        tableCapitalGainsTax: "Capital gain tax",
-        tableCompanyTax: "Corporate tax *",
-        tableCompanyTaxOfDivident: "dividend",
-        tableCorporateTaxDescription:
-          "* Corporate tax your company has paid from the divident amount.",
-        tableTaxesInTotal: "Total taxation",
-        informationTitle: "More information?",
-        informationDescription:
-          "Something in the calculation bugging you? Found a bug? Please leave a message and we'll try to get back to you as soon as possible.",
-        informationFeedbackButton: "Leave feedback",
-        footer:
-          "The figures calculated by the service are indicative estimates based on averages and the data collected. osinkoavaipalkkaa.fi does not take responsibility for the information calculated by the service or its accuracy. The user of the service is responsible for the use of the information provided by the service. <br /><br />The information entered by users into the service is not collected or stored.",
+i18Next
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: {
+        translation: en,
+      },
+      fi: {
+        translation: fi,
       },
     },
-    fi: {
-      translation: {
-        title: "Osinkoa vai palkkaa?",
-        subtitle: "Ja kuinka paljon?",
-        description:
-          "Kannattaako yrityksestä nostaa palkkaa vai osinkoa ja minkä verran? <strong>Osinkoa vai palkkaa</strong> auttaa sinua löytämään oikean määrän palkkaa ja osinkoa suhteessa maksettavien verojen määrään. Palvelu on tarkoitettu pääasiassa oman osakeyhtiön omistaville freelancereille ja yksityisyrittäjille.",
-        start: "Aloita syöttämällä perustiedot",
-        startHelp:
-          "Täytä seuraavat 3 kenttää. Näiden tietojen perusteella muodostamme laskemme kaikki mahdolliset skenaariot.",
-        inputsNetFunds: "Yrityksen nettovarallisuus tilikauden alussa",
-        inputsProfitPredition: "Ennuste yrityksen voitosta ennen palkkakuluja",
-        inputMinimumIncome: "Halutun nettotulon alaraja",
-        scenariosTitle: "Palkan & osingon suhde verotukseen",
-        scenariosDescription:
-          "Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään. Seuraavasta taulukosta näet verotuksellisesti edullisimman vaihtoehdon.",
-        heatmapLegendDivident: "osinko",
-        heatmapLegendSalary: "palkka",
-        heatmapGrossLabel: "Brutto",
-        heatmapTaxLabel: "Vero",
-        heatmapDividentLabel: "Osinko",
-        heatmapCompanyTaxLabel: "Yhteisövero *",
-        heatmapSalaryLabel: "Palkka",
-        heatmapTotalLabel: "Yhteensä",
-        heatmapNetLabel: "Nettosumma",
-        heatmapCompanyProfit: "Yrityksen tulos",
-        heatMapCompanyTaxDescription:
-          "* aikaisemmin osingoista maksettu yhteisövero",
-        calculationsTitle: "Laskelmat",
-        calculationsDescriptionIdealNotCheapest:
-          "Seuraavassa sinulle sopivin vaihtoehto syöttämääsi nettotulon alarajaan suhteutettuna. Mukana vertailun vuoksi myös verotuksellisesti halvin, sekä kaikista kallein vaihtoehto.",
-        calculationsDescriptionIdealCheapest:
-          "Seuraavassa sinulle sopivin vaihtoehto syöttämääsi nettotulon alarajaan suhteutettuna. Mukana vertailun vuoksi myös kaikista kallein vaihtoehto.",
-        cardBestOption: "sinulle paras vaihtoehto",
-        cheapestOption: "halvin vaihtoehto",
-        mostExpensiveOption: "kallein vaihtoehto",
-        cardDivident: "osinkoa",
-        cardSalary: "palkkaa",
-        wouldSaveInTaxes: "säästäisi omassa verotuksessasi",
-        wouldIncreaseTaxes: "kasvattaisi omaa verotustasi",
-        wouldSaveInDividentTax: "säästäisi osingoista verotettavaa määrää",
-        wouldIncreaseDividentTax: "kasvattaisi osingoista verotettavaa määrää",
-        and: "ja",
-        but: "mutta",
-        nextCheapest: "Seuraavaksi halvin vaihtoehto",
-        netIncome: "nettotuloa",
-        inTotalYouWouldSave: "Kokonaisuudessaan rahaa säästyisi noin",
-        tableNetIncome: "Nettotulo",
-        tableSalary: "Palkkaa",
-        tableIncomeTax: "Tulovero",
-        tableDivident: "Osinkoa",
-        tableCapitalGainsTax: "Pääomatulovero",
-        tableCompanyTax: "Yhteisövero *",
-        tableCompanyTaxOfDivident: "osingosta",
-        tableCorporateTaxDescription:
-          "* aikaisemmin osingoista maksettu yhteisövero.",
-        tableTaxesInTotal: "Veroja yhteensä",
-        informationTitle: "Lisätietoa?",
-        informationDescription:
-          "Haluaisitko saada vieläkin tarkempaa tietoa eri vaihtoehdoista osakeyhtiön palkanmaksuun liittyen? Onko mielessäsi parannusehdotus tai kommentti palveluun liittyen?",
-        informationFeedbackButton: "Lähetä palautetta",
-        footer:
-          "Palvelun laskemat luvut ovat kerättyyn aineistoon ja keskiarvioihin perustuvia suuntaa antavia arvioita. <br /> osinkoavaipalkkaa.fi ei ota vastuuta palvelun laskemista tiedoista eikä niiden oikeellisuudesta. <br />Palvelun käyttäjä kantaa itse vastuun palvelun antamien tietojenhyödyntämisestä.<br /><br />Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.",
-      },
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false,
     },
-  },
-  lng: "en",
-  fallbackLng: "en",
+  })
 
-  interpolation: {
-    escapeValue: false,
-  },
-})
-
-i18n.languages = ["fi", "en"]
+i18Next.languages = ["fi", "en"]
 
 function PointWithTooltip({
   x,
@@ -453,16 +332,28 @@ const IndexPage = () => {
     cheapest
 
   const nextCheapest = scenarios[scenarios.indexOf(ideal) - 1]
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
+  const toggleLanguage = () => {
+    i18n.changeLanguage(i18n.language === "fi" ? "en" : "fi")
+  }
+
   return (
     <div>
-      <header>
+      <header className="header">
         <SEO />
-        <h1>{t("title")}</h1>
-        <h2>{t("subtitle")}</h2>
-        <p>
-          <Trans i18nKey="description" />
-        </p>
+        <div>
+          <h1>{t("title")}</h1>
+          <h2>{t("subtitle")}</h2>
+          <p>
+            <Trans i18nKey="description" />
+          </p>
+        </div>
+        <div className="language-select">
+          <button onClick={() => toggleLanguage()} className="language">
+            {i18n.language === "fi" ? "🇬🇧 In English" : "🇫🇮 Suomeksi"}
+          </button>
+        </div>
       </header>
       <section className="main">
         <form className="details-form">
@@ -772,7 +663,7 @@ const IndexPage = () => {
 }
 
 export default () => (
-  <I18nextProvider i18n={i18n}>
+  <I18nextProvider i18n={i18Next}>
     <IndexPage />
   </I18nextProvider>
 )

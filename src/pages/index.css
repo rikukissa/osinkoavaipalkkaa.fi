@@ -61,6 +61,21 @@ label {
   display: flex;
   position: relative;
 }
+.header {
+  display: flex;
+}
+
+.language-select {
+  flex-shrink: 0;
+}
+
+.language {
+  border: 0;
+  font: inherit;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+}
 
 .number-input {
   border: 0;
