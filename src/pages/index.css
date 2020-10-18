@@ -60,6 +60,7 @@ label {
 .input {
   display: flex;
   position: relative;
+  padding-right: 3em;
 }
 
 .number-input {
