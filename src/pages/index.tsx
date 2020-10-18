@@ -35,6 +35,66 @@ import "./index.css"
 
 i18n.use(initReactI18next).init({
   resources: {
+    en: {
+      translation: {
+        title: "Dividend or salary?",
+        subtitle: "And how much?",
+        description:
+          "<strong>Osinkoa vai palkkaa</strong> helps you to find the optimal amount of salary and divident in relation to the amount of taxes payable. The service is intended mainly for freelancers and sole proprietors with their own limited company (Oy) in Finland.",
+        start: "Start by entering basic information",
+        startHelp:
+          "Fill the 3 following fields. We calculate all possible scenarios based on this information.",
+        inputsNetFunds: "Company's net assets at the beginning of fiscal year",
+        inputsProfitPredition:
+          "Estimate of company profit without salary expenses",
+        inputMinimumIncome: "The amount of net income you need this year",
+        scenariosTitle:
+          "The relation between salary and divident to taxes payable",
+        scenariosDescription:
+          "The amount of salary and divident you pay have a direct relation to amount of taxes. This chart displays different scenarios and how the numbers affect each other.",
+        heatmapGrossLabel: "Gross",
+        heatmapTaxLabel: "Tax",
+        heatmapDividentLabel: "Dividend",
+        heatmapCompanyTaxLabel: "Corporate tax *",
+        heatmapSalaryLabel: "Salary",
+        heatmapTotalLabel: "Total",
+        heatmapNetLabel: "Net amount",
+        heatmapCompanyProfit: "Company revenue",
+        heatMapCompanyTaxDescription:
+          "* Corporate tax your company has paid from the divident amount.",
+        calculationsTitle: "Calculations",
+        calculationsDescriptionIdealNotCheapest:
+          "Here you can see your most cost-efficient option based on the minimum net income you inputted. For comparison, you can also see the most cheapest and expensive option.",
+        calculationsDescriptionIdealCheapest:
+          "Here you can see your most cost-efficient option based on the minimum net income you inputted. For comparison, you can see the most expensive option.",
+        cardBestOption: "best option for you",
+        cardDivident: "dividend",
+        cardSalary: "salary",
+        wouldSaveInTaxes: "",
+        wouldIncreaseTaxes: "",
+        wouldSaveInDividentTax: "",
+        wouldIncreaseDividentTax: "",
+        and: "and",
+        but: "but",
+        nextCheapest: "The next cheapest option",
+        netIncome: "net income",
+        inTotalYouWouldSave: "Approximate total money saved",
+        tableNetIncome: "Net income",
+        tableSalary: "Salary",
+        tableIncomeTax: "Income tax",
+        tableDivident: "Dividend",
+        tableCapitalGainsTax: "Capital gain tax",
+        tableCompanyTax: "Corporate tax",
+        tableCompanyTaxOfDivident: "dividend",
+        tableTaxesInTotal: "Total taxation",
+        informationTitle: "More information?",
+        informationDescription:
+          "Something in the calculation bugging you? Found a bug? Please leave a message and we'll try to get back to you as soon as possible.",
+        informationFeedbackButton: "Leave feedback",
+        footer:
+          "The figures calculated by the service are indicative estimates based on averages and the data collected. osinkoavaipalkkaa.fi does not take responsibility for the information calculated by the service or its accuracy. The user of the service is responsible for the use of the information provided by the service. <br /><br />The information entered by users into the service is not collected or stored.",
+      },
+    },
     fi: {
       translation: {
         title: "Osinkoa vai palkkaa?",
@@ -93,13 +153,8 @@ i18n.use(initReactI18next).init({
           "Palvelun laskemat luvut ovat kerättyyn aineistoon ja keskiarvioihin perustuvia suuntaa antavia arvioita. <br /> osinkoavaipalkkaa.fi ei ota vastuuta palvelun laskemista tiedoista eikä niiden oikeellisuudesta. <br />Palvelun käyttäjä kantaa itse vastuun palvelun antamien tietojenhyödyntämisestä.<br /><br />Käyttäjien palveluun syöttämiä tietoja ei kerätä eikä tallenneta.",
       },
     },
-    en: {
-      translation: {
-        title: "Divident or salary?",
-      },
-    },
   },
-  lng: "fi",
+  lng: "en",
   fallbackLng: "en",
 
   interpolation: {
