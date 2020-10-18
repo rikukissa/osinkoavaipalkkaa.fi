@@ -52,6 +52,8 @@ i18n.use(initReactI18next).init({
           "The relation between salary and divident to taxes payable",
         scenariosDescription:
           "The amount of salary and divident you pay have a direct relation to amount of taxes. This chart displays different scenarios and how the numbers affect each other.",
+        heatmapLegendDivident: "divident",
+        heatmapLegendSalary: "salary",
         heatmapGrossLabel: "Gross",
         heatmapTaxLabel: "Tax",
         heatmapDividentLabel: "Dividend",
@@ -70,10 +72,11 @@ i18n.use(initReactI18next).init({
         cardBestOption: "best option for you",
         cardDivident: "dividend",
         cardSalary: "salary",
-        wouldSaveInTaxes: "",
-        wouldIncreaseTaxes: "",
-        wouldSaveInDividentTax: "",
-        wouldIncreaseDividentTax: "",
+        wouldSaveInTaxes: "would reduce your personal taxation by",
+        wouldIncreaseTaxes: "would increase your personal taxation by",
+        wouldSaveInDividentTax: "would reduce taxes paid from divident by",
+        wouldIncreaseDividentTax:
+          "would increase the taxes paid from divident by",
         and: "and",
         but: "but",
         nextCheapest: "The next cheapest option",
@@ -84,8 +87,10 @@ i18n.use(initReactI18next).init({
         tableIncomeTax: "Income tax",
         tableDivident: "Dividend",
         tableCapitalGainsTax: "Capital gain tax",
-        tableCompanyTax: "Corporate tax",
+        tableCompanyTax: "Corporate tax *",
         tableCompanyTaxOfDivident: "dividend",
+        tableCorporateTaxDescription:
+          "* Corporate tax your company has paid from the divident amount.",
         tableTaxesInTotal: "Total taxation",
         informationTitle: "More information?",
         informationDescription:
@@ -110,6 +115,8 @@ i18n.use(initReactI18next).init({
         scenariosTitle: "Palkan & osingon suhde verotukseen",
         scenariosDescription:
           "Yrityksestä nostettu raha vaikuttaa maksettavien verojen määrään. Seuraavasta taulukosta näet verotuksellisesti edullisimman vaihtoehdon.",
+        heatmapLegendDivident: "osinko",
+        heatmapLegendSalary: "palkka",
         heatmapGrossLabel: "Brutto",
         heatmapTaxLabel: "Vero",
         heatmapDividentLabel: "Osinko",
@@ -142,8 +149,10 @@ i18n.use(initReactI18next).init({
         tableIncomeTax: "Tulovero",
         tableDivident: "Osinkoa",
         tableCapitalGainsTax: "Pääomatulovero",
-        tableCompanyTax: "Yhteisövero",
+        tableCompanyTax: "Yhteisövero *",
         tableCompanyTaxOfDivident: "osingosta",
+        tableCorporateTaxDescription:
+          "* aikaisemmin osingoista maksettu yhteisövero.",
         tableTaxesInTotal: "Veroja yhteensä",
         informationTitle: "Lisätietoa?",
         informationDescription:
@@ -645,7 +654,7 @@ const IndexPage = () => {
             </div>
           </article>
           <aside>
-            <section>
+            <section className="reference">
               <table
                 className={[
                   "reference-table",
@@ -661,11 +670,7 @@ const IndexPage = () => {
                     <th>{t("tableDivident")}</th>
                     <th>{t("tableCapitalGainsTax")}</th>
 
-                    <th>
-                      {t("tableCompanyTax")}
-                      <br />
-                      <small>{t("tableCompanyTaxOfDivident")}</small>
-                    </th>
+                    <th>{t("tableCompanyTax")}</th>
 
                     <th>{t("tableTaxesInTotal")}</th>
                   </tr>
@@ -737,6 +742,7 @@ const IndexPage = () => {
                   ))}
                 </tbody>
               </table>
+              <small>{t("tableCorporateTaxDescription")}</small>
             </section>
             <section>
               <h2>{t("informationTitle")}</h2>

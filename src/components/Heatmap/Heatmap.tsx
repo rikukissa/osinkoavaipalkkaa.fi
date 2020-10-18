@@ -148,6 +148,7 @@ export function Heatmap(props: {
 
   return (
     <div ref={container} className="heatmap">
+      <span className="heatmap-legend">{t("heatmapLegendDivident")}</span>
       <ReactTooltip
         id="heatmap"
         effect="solid"
@@ -333,6 +334,7 @@ export function Heatmap(props: {
           ))}
         </div>
       )}
+      <span className="heatmap-legend">{t("heatmapLegendSalary")}</span>
     </div>
   )
 }
