@@ -351,7 +351,15 @@ const IndexPage = () => {
         </div>
         <div className="language-select">
           <button onClick={() => toggleLanguage()} className="language">
-            {i18n.language === "fi" ? "🇬🇧 In English" : "🇫🇮 Suomeksi"}
+            {i18n.language === "fi" ? (
+              <>
+                🇬🇧 <span>In English</span>
+              </>
+            ) : (
+              <>
+                🇫🇮 <span>Suomeksi</span>
+              </>
+            )}
           </button>
         </div>
       </header>

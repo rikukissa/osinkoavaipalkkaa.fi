@@ -8,8 +8,14 @@ html {
 }
 
 body {
-  padding: 2rem 1rem;
+  padding: 1rem 1rem;
   margin: 0;
+}
+
+@media (min-width: 800px) {
+  body {
+    margin: 1rem;
+  }
 }
 
 h1,
@@ -63,18 +69,39 @@ label {
 }
 .header {
   display: flex;
+  flex-direction: column-reverse;
 }
 
 .language-select {
   flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 800px) {
+  .language-select {
+    margin-bottom: 0;
+  }
+  .header {
+    flex-direction: row;
+  }
+  .language-select {
+    display: block;
+  }
 }
 
 .language {
+  color: inherit;
   border: 0;
   font: inherit;
   background: transparent;
   font-size: 1rem;
   cursor: pointer;
+}
+
+.language span {
+  font-size: 0.8rem;
 }
 
 .number-input {
