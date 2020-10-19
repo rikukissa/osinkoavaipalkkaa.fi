@@ -89,6 +89,7 @@ label {
   padding-top: 0;
   padding-bottom: 0;
   padding-right: 1em;
+  box-sizing: border-box;
 }
 .number-input:focus {
   outline: none;
