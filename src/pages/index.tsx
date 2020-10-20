@@ -303,10 +303,7 @@ const IndexPage = () => {
         dividents,
         companyTaxesFromDividents: companyTaxesFromDividents(dividents),
         salary,
-        capitalGainsTax: getCapitalGainsTaxEuroAmount(
-          dividents,
-          totalSharesInCompany
-        ),
+        capitalGainsTax: getCapitalGainsTaxEuroAmount(dividents),
         incomeTax: getIncomeTaxEuroAmount(salary),
         netIncome: getNetIncome(salary, dividents, totalSharesInCompany),
         grossIncome: salary + dividents,
