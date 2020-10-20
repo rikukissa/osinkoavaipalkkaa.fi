@@ -53,21 +53,32 @@ export function getIncomeTaxEuroAmount(grossIncome: number): TaxPercentage {
  * Pääomatulovero
  */
 
-export function getCapitalGainsTaxEuroAmount(
+/*
+ * Splits divident amount into a part that's taxed as capital gains (first 8%)
+ * and a part that's taxed as work income
+ * https://www.veronmaksajat.fi/Sijoittaminen/Osinkojen-verotus/#bed8e2d5
+ */
+function splitDividentIntoTaxableClasses(
   dividents: number,
   totalSharesInCompany: number
 ) {
   const eightPercentagePart = totalSharesInCompany * 0.08
-  const below8pPart = Math.min(eightPercentagePart, dividents)
+  const asCapitalGains = Math.min(eightPercentagePart, dividents)
+  const asWorkIncome = Math.max(0, dividents - asCapitalGains)
+  return [asCapitalGains, asWorkIncome] as const
+}
 
-  const below150kPart = Math.min(below8pPart, 150000)
-  const over150kPart = Math.max(0, below8pPart - 150000)
+/*
+ * Meant for calculating the 8% of shares part only
+ */
+export function getCapitalGainsTaxEuroAmount(dividents: number) {
+  const below150kPart = Math.min(dividents, 150000)
+  const over150kPart = Math.max(0, dividents - 150000)
 
-  const over8pPart = Math.max(0, dividents - below8pPart)
-
-  const taxable = below150kPart * 0.25 + over150kPart * 0.85 + over8pPart * 0.75
+  const taxable = below150kPart * 0.25 + over150kPart * 0.85
 
   const over30kPart = Math.max(0, taxable - 30000)
+
   return (taxable - over30kPart) * 0.3 + over30kPart * 0.34
 }
 
@@ -96,9 +107,14 @@ export function getTotalTaxEuroAmount(
   capitalGains: number,
   totalSharesInCompany: number
 ) {
+  const [asCapitalGains, asWorkIncome] = splitDividentIntoTaxableClasses(
+    capitalGains,
+    totalSharesInCompany
+  )
+
   return (
-    getIncomeTaxEuroAmount(grossIncome) +
-    getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany) +
+    getIncomeTaxEuroAmount(grossIncome + asWorkIncome) +
+    getCapitalGainsTaxEuroAmount(asCapitalGains) +
     companyTaxesFromDividents(capitalGains)
   )
 }
@@ -107,11 +123,15 @@ export function getNetIncome(
   capitalGains: number,
   totalSharesInCompany: number
 ) {
+  const [asCapitalGains, asWorkIncome] = splitDividentIntoTaxableClasses(
+    capitalGains,
+    totalSharesInCompany
+  )
   return (
     grossIncome -
-    getIncomeTaxEuroAmount(grossIncome) +
+    getIncomeTaxEuroAmount(grossIncome + asWorkIncome) +
     capitalGains -
-    getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany)
+    getCapitalGainsTaxEuroAmount(asCapitalGains)
   )
 }
 
@@ -120,8 +140,12 @@ export function getPersonalTaxes(
   capitalGains: number,
   totalSharesInCompany: number
 ) {
+  const [asCapitalGains, asWorkIncome] = splitDividentIntoTaxableClasses(
+    capitalGains,
+    totalSharesInCompany
+  )
   return (
-    getIncomeTaxEuroAmount(grossIncome) +
-    getCapitalGainsTaxEuroAmount(capitalGains, totalSharesInCompany)
+    getIncomeTaxEuroAmount(grossIncome + asWorkIncome) +
+    getCapitalGainsTaxEuroAmount(asCapitalGains)
   )
 }
