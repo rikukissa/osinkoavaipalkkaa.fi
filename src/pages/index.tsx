@@ -3,6 +3,7 @@ import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 import uniq from "lodash/uniq"
 import uniqBy from "lodash/uniqBy"
 import mapValues from "lodash/mapValues"
+import debounce from "lodash/debounce"
 import i18Next from "i18next"
 import {
   useTranslation,
@@ -14,6 +15,8 @@ import LanguageDetector from "i18next-browser-languagedetector"
 import range from "lodash/range"
 import classnames from "classnames"
 import useLocalStorage from "react-use/lib/useLocalStorage"
+import Slider from "rc-slider"
+import "rc-slider/assets/index.css"
 import SEO from "../components/seo"
 import { sendEvent } from "../tags"
 import { Currency } from "../components/Currency"
@@ -247,26 +250,33 @@ const IndexPage = () => {
     state.companyNetWorth === 0 &&
     state.companyProfitEstimate === 0
 
-  useEffect(() => {
-    const newState: Partial<typeof state> = {}
-    if (draftState === initialDraftState) {
-      return
-    }
-    for (const key of Object.keys(draftState) as Array<
-      keyof typeof draftState
-    >) {
-      const value = draftState[key]
-      const parsed = parseInt(value, 10)
+  useEffect(
+    debounce(
+      () => {
+        const newState: Partial<typeof state> = {}
+        if (draftState === initialDraftState) {
+          return
+        }
+        for (const key of Object.keys(draftState) as Array<
+          keyof typeof draftState
+        >) {
+          const value = draftState[key]
+          const parsed = parseInt(value, 10)
 
-      if (isNaN(parsed) || parsed < 0) {
-        return
-      }
-      newState[key] = parsed
-    }
-    sendEvent("key-values-configured")
-    setState(newState as typeof state)
-    setStoredState(newState as typeof state)
-  }, [draftState])
+          if (isNaN(parsed) || parsed < 0) {
+            return
+          }
+          newState[key] = parsed
+        }
+        sendEvent("key-values-configured")
+        setState(newState as typeof state)
+        setStoredState(newState as typeof state)
+      },
+      300,
+      { leading: true }
+    ),
+    [draftState]
+  )
 
   const brackets = range(100).map((i) => i / 100)
 
@@ -387,6 +397,17 @@ const IndexPage = () => {
                 id="company-value"
               />
             </div>
+            <Slider
+              min={0}
+              max={1000000}
+              value={Number(draftState.companyNetWorth)}
+              onChange={(companyNetWorth) => {
+                setDraftState({
+                  ...draftState,
+                  companyNetWorth: companyNetWorth.toString(),
+                })
+              }}
+            />
           </div>
           <div className="form-item">
             <label htmlFor="profit-prediction">
