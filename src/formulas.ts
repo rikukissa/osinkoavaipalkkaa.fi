@@ -1,36 +1,5 @@
 import { INCOME_TAX, ITaxBracket } from "./income-tax"
 
-const f = (a: any[], b: any[]) =>
-  // @ts-ignore
-  [].concat(...a.map((aItem) => b.map((bItem) => [].concat(aItem, bItem))))
-
-export function permutate<T>(
-  a: any[] | any[],
-  b?: any[],
-  ...c: any[][]
-): T[][] {
-  return b ? permutate(f(a, b), ...c) : a
-}
-
-export interface IScenario {
-  dividents: number
-  companyTaxesFromDividents: number
-  salary: number
-  netSalary: number
-  netIncome: number
-  taxes: number
-  personalTaxes: number
-  companyTaxes: number
-  companyProfit: number
-  incomeTax: number
-  incomeTaxPercentage: number
-  capitalGainsTax: number
-  grossIncome: number
-}
-export function sortByBest(scenarios: IScenario[]) {
-  return [...scenarios].sort((a, b) => a.taxes - b.taxes)
-}
-
 type TaxPercentage = number
 
 export function getIncomeTaxBracket(grossIncome: number): ITaxBracket {
@@ -45,8 +14,11 @@ export function getIncomeTaxBracket(grossIncome: number): ITaxBracket {
  * Ansiotulovero
  */
 
-export function getIncomeTaxEuroAmount(grossIncome: number): TaxPercentage {
-  return (getIncomeTaxBracket(grossIncome).percentage / 100) * grossIncome
+export function getIncomeTaxEuroAmount(
+  grossIncome: number,
+  taxBracket: ITaxBracket
+): TaxPercentage {
+  return (taxBracket.percentage / 100) * grossIncome
 }
 
 /*
@@ -58,7 +30,7 @@ export function getIncomeTaxEuroAmount(grossIncome: number): TaxPercentage {
  * and a part that's taxed as work income
  * https://www.veronmaksajat.fi/Sijoittaminen/Osinkojen-verotus/#bed8e2d5
  */
-function splitDividentIntoTaxableClasses(
+export function splitDividentIntoTaxableClasses(
   dividents: number,
   totalSharesInCompany: number
 ) {
@@ -105,47 +77,37 @@ export function companyTaxesFromDividents(dividents: number) {
 export function getTotalTaxEuroAmount(
   grossIncome: number,
   capitalGains: number,
-  totalSharesInCompany: number
+  asWorkIncome: number,
+  dividents: number,
+  incomeTaxBracket: ITaxBracket
 ) {
-  const [asCapitalGains, asWorkIncome] = splitDividentIntoTaxableClasses(
-    capitalGains,
-    totalSharesInCompany
-  )
-
   return (
-    getIncomeTaxEuroAmount(grossIncome + asWorkIncome) +
-    getCapitalGainsTaxEuroAmount(asCapitalGains) +
-    companyTaxesFromDividents(capitalGains)
+    getIncomeTaxEuroAmount(grossIncome, incomeTaxBracket) +
+    getCapitalGainsTaxEuroAmount(capitalGains) +
+    getIncomeTaxEuroAmount(asWorkIncome, incomeTaxBracket) +
+    companyTaxesFromDividents(dividents)
   )
 }
 export function getNetIncome(
   grossIncome: number,
   capitalGains: number,
-  totalSharesInCompany: number
+  incomeTaxBracket: ITaxBracket
 ) {
-  const [asCapitalGains, asWorkIncome] = splitDividentIntoTaxableClasses(
-    capitalGains,
-    totalSharesInCompany
-  )
   return (
     grossIncome -
-    getIncomeTaxEuroAmount(grossIncome + asWorkIncome) +
+    getIncomeTaxEuroAmount(grossIncome, incomeTaxBracket) +
     capitalGains -
-    getCapitalGainsTaxEuroAmount(asCapitalGains)
+    getCapitalGainsTaxEuroAmount(capitalGains)
   )
 }
 
 export function getPersonalTaxes(
   grossIncome: number,
   capitalGains: number,
-  totalSharesInCompany: number
+  incomeTaxBracket: ITaxBracket
 ) {
-  const [asCapitalGains, asWorkIncome] = splitDividentIntoTaxableClasses(
-    capitalGains,
-    totalSharesInCompany
-  )
   return (
-    getIncomeTaxEuroAmount(grossIncome + asWorkIncome) +
-    getCapitalGainsTaxEuroAmount(asCapitalGains)
+    getIncomeTaxEuroAmount(grossIncome, incomeTaxBracket) +
+    getCapitalGainsTaxEuroAmount(capitalGains)
   )
 }
