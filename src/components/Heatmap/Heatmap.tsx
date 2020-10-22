@@ -222,7 +222,7 @@ export function Heatmap(props: {
                       <Currency>{scenario.salary}</Currency>
                     </td>
                     <td>
-                      <Currency>{scenario.incomeTax}</Currency>
+                      <Currency>{scenario.incomeTaxFromSalary}</Currency>
                     </td>
                   </tr>
                   <tr className="tooltip-total">

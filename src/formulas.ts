@@ -77,14 +77,12 @@ export function companyTaxesFromDividents(dividents: number) {
 export function getTotalTaxEuroAmount(
   grossIncome: number,
   capitalGains: number,
-  asWorkIncome: number,
   dividents: number,
   incomeTaxBracket: ITaxBracket
 ) {
   return (
     getIncomeTaxEuroAmount(grossIncome, incomeTaxBracket) +
     getCapitalGainsTaxEuroAmount(capitalGains) +
-    getIncomeTaxEuroAmount(asWorkIncome, incomeTaxBracket) +
     companyTaxesFromDividents(dividents)
   )
 }

@@ -29,6 +29,7 @@ export interface IScenario {
   dividents: number
   companyTaxesFromDividents: number
   salary: number
+  incomeTaxFromSalary: number
   netSalary: number
   netIncome: number
   taxes: number
@@ -76,13 +77,13 @@ function toScenario(
     companyTaxes,
     companyTaxesFromDividents: companyTaxesFromDividents(dividents),
     incomeTax: getIncomeTaxEuroAmount(totalWorkIncome, incomeTaxBracket),
+    incomeTaxFromSalary: getIncomeTaxEuroAmount(salary, incomeTaxBracket),
     grossIncome: salary + dividents,
     incomeTaxPercentage: incomeTaxBracket.percentage,
     netSalary: salary - getIncomeTaxEuroAmount(salary, incomeTaxBracket),
     taxes: getTotalTaxEuroAmount(
       totalWorkIncome,
       asCapitalGains,
-      asWorkIncome,
       dividents,
       incomeTaxBracket
     ),
