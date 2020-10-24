@@ -41,7 +41,7 @@
   "tableSalary": "Salary",
   "tableIncomeTax": "Income tax",
   "tableDivident": "Dividend",
-  "tableCapitalGainsTax": "Capital gain tax",
+  "tableCapitalGainsTax": "Capital gains tax",
   "tableCompanyTax": "Corporate tax *",
   "tableCompanyTaxOfDivident": "dividend",
   "tableCorporateTaxDescription": "* Corporate tax your company has paid from the divident amount.",
