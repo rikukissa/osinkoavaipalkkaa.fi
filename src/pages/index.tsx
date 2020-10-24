@@ -446,7 +446,7 @@ const IndexPage = () => {
                 {t("informationDescription")}
                 <a
                   className="btn"
-                  href="https://forms.gle/xZovhsW5GDB3J8w39"
+                  href="https://github.com/rikukissa/osinkoavaipalkkaa.fi/issues"
                   target="_blank"
                 >
                   {t("informationFeedbackButton")}
