@@ -172,18 +172,18 @@ export function Heatmap(props: {
         }}
         getContent={(id) => {
           if (!id || disabled) {
-            return
+            return false
           }
           const [dividents, salary] = id.split("-")
 
           if (!grid[dividents]) {
-            return
+            return false
           }
 
           const scenario = grid[dividents][parseInt(salary, 10)]
 
           if (!scenario) {
-            return
+            return false
           }
 
           return (
@@ -213,6 +213,7 @@ export function Heatmap(props: {
                       <Currency>{scenario.companyTaxesFromDividents}</Currency>
                     </td>
                   </tr>
+
                   <tr>
                     <td>
                       {t("heatmapSalaryLabel")} ({scenario.incomeTaxPercentage}
