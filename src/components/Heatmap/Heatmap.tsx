@@ -4,7 +4,7 @@ import uniq from "lodash/uniq"
 import range from "lodash/range"
 import values from "lodash/values"
 import flatten from "lodash/flatten"
-import { IScenario } from "../../formulas"
+import { IScenario } from "../../scenarios"
 import { Currency } from "../Currency"
 import "./Heatmap.css"
 import { useTranslation } from "react-i18next"
@@ -203,7 +203,7 @@ export function Heatmap(props: {
                       <Currency>{scenario.dividents}</Currency>
                     </td>
                     <td>
-                      <Currency>{scenario.capitalGainsTax}</Currency>
+                      <Currency>{scenario.taxFromDividents}</Currency>
                     </td>
                   </tr>
                   <tr>
@@ -223,9 +223,7 @@ export function Heatmap(props: {
                       <Currency>{scenario.salary}</Currency>
                     </td>
                     <td>
-                      <Currency>
-                        {scenario.salary - scenario.netSalary}
-                      </Currency>
+                      <Currency>{scenario.incomeTaxFromSalary}</Currency>
                     </td>
                   </tr>
                   <tr className="tooltip-total">
@@ -302,6 +300,13 @@ export function Heatmap(props: {
                           disabled ? "heatmap-cell--disabled" : "",
                         ].join(" ")}
                       >
+                        {scenario !== ideal && scenario !== cheapest && (
+                          <span className="heatmap-ratio">
+                            {(scenario.taxes / scenario.netIncome || 0).toFixed(
+                              2
+                            )}
+                          </span>
+                        )}
                         {scenario === ideal ? (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

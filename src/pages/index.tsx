@@ -1,7 +1,6 @@
 import ReactTooltip from "react-tooltip"
 import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 import uniq from "lodash/uniq"
-import uniqBy from "lodash/uniqBy"
 import mapValues from "lodash/mapValues"
 import i18Next from "i18next"
 import {
@@ -11,7 +10,6 @@ import {
   Trans,
 } from "react-i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
-import range from "lodash/range"
 import classnames from "classnames"
 import useLocalStorage from "react-use/lib/useLocalStorage"
 import SEO from "../components/seo"
@@ -19,19 +17,8 @@ import { sendEvent } from "../tags"
 import { Currency } from "../components/Currency"
 import { Heatmap } from "../components/Heatmap/Heatmap"
 import { INCOME_TAX } from "../income-tax"
-import {
-  permutate,
-  getTotalTaxEuroAmount,
-  getNetIncome,
-  getPersonalTaxes,
-  getCorporateTax,
-  getIncomeTaxBracket,
-  IScenario,
-  sortByBest,
-  getCapitalGainsTaxEuroAmount,
-  getIncomeTaxEuroAmount,
-  companyTaxesFromDividents,
-} from "../formulas"
+import { getIncomeTaxBracket } from "../formulas"
+import { getIdealScenario, getScenarios } from "../scenarios"
 import "./index.css"
 import en from "../i18n/en.json"
 import fi from "../i18n/fi.json"
@@ -55,145 +42,6 @@ i18Next
   })
 
 i18Next.languages = ["fi", "en"]
-
-function PointWithTooltip({
-  x,
-  y,
-  width,
-  id,
-}: {
-  id: number
-  x: number
-  y: number
-  width: number
-}) {
-  const ref = useRef<SVGCircleElement>(null)
-
-  const focusCircle = () => ReactTooltip.show(ref.current!)
-
-  return (
-    <>
-      <circle
-        data-tip={id}
-        data-for="chart"
-        ref={ref}
-        fill="#D68560"
-        cx={x}
-        cy={y}
-        r="0.01"
-      />
-      <rect
-        onTouchStart={focusCircle}
-        onMouseEnter={focusCircle}
-        x={x - width / 2}
-        y={0}
-        width={width}
-        height="50"
-      />
-    </>
-  )
-}
-
-function Chart({ label, ideal }: { label: string; ideal?: IScenario }) {
-  const TICKS = INCOME_TAX.length
-  const WIDTH = 100
-  const HEIGHT = 50
-  const tooltip = useRef<ReactTooltip>(null)
-
-  const points = INCOME_TAX.map(({ percentage }, i) => [
-    (WIDTH / TICKS) * (i + 1),
-    HEIGHT - percentage / 2,
-  ])
-
-  const hideTooltip = () => {
-    if (tooltip.current) {
-      ;(tooltip.current as any).globalHide()
-    }
-  }
-
-  return (
-    <div className="chart" onMouseLeave={hideTooltip}>
-      <div className="svg-container">
-        <svg
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <linearGradient
-              id="paint0_linear"
-              x1="124"
-              y1="3"
-              x2="124"
-              y2="53.5"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="#F7D6C8" />
-              <stop offset="1" stopColor="#fff" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path
-            d={`M0 ${HEIGHT} ${points
-              .map(([x, y]) => `L${x} ${y}`)
-              .join(" ")} V${HEIGHT}Z`}
-            fill="url(#paint0_linear)"
-          />
-          <path
-            d={`M0 ${HEIGHT} ${points.map(([x, y]) => `L${x} ${y}`).join(" ")}`}
-            stroke="#D68560"
-          />
-          {ideal && (
-            <path
-              stroke="rgba(50, 175, 181, 0.22)"
-              strokeDasharray="1.5,1.5"
-              strokeWidth="0.3"
-              d={`M${
-                points[INCOME_TAX.indexOf(getIncomeTaxBracket(ideal.salary))][0]
-              } 0 l0 50`}
-            />
-          )}
-
-          {points.map(([x, y], i) => (
-            <PointWithTooltip
-              key={i}
-              x={x}
-              y={y}
-              width={WIDTH / points.length}
-              id={INCOME_TAX[i].income}
-            />
-          ))}
-        </svg>
-        <ReactTooltip
-          id="chart"
-          effect="solid"
-          ref={tooltip}
-          getContent={(id) => {
-            if (!id) {
-              return
-            }
-
-            const bracket = INCOME_TAX.find(
-              ({ income }) => income.toString() === id
-            )!
-
-            return (
-              <div className="tooltip">
-                <strong className="tooltip__title">
-                  <Currency>{bracket.income}</Currency>
-                  <br /> palkkaa
-                </strong>
-                <span>
-                  Veroprosentti <strong>{bracket.percentage}%</strong>
-                </span>
-              </div>
-            )
-          }}
-        />
-      </div>
-      <label>{label}</label>
-    </div>
-  )
-}
 
 function Card({
   children,
@@ -219,8 +67,6 @@ const initialState = {
   companyNetWorth: 0,
   companyProfitEstimate: 0,
 }
-
-const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
 
 const stateToDraftState = (state: typeof initialState) => ({
   ...mapValues(state, (val) => (val === 0 ? "" : val.toString())),
@@ -268,68 +114,16 @@ const IndexPage = () => {
     setStoredState(newState as typeof state)
   }, [draftState])
 
-  const brackets = range(100).map((i) => i / 100)
-
-  const permutations = permutate<number>(
-    brackets,
-    brackets
-  ).map(([dividents, salary]) =>
-    disabled
-      ? [roundTo1000(100000 * dividents), roundTo1000(30000 * salary)]
-      : [
-          roundTo1000(state.companyNetWorth * dividents),
-          roundTo1000(
-            Math.max(
-              state.companyProfitEstimate * salary,
-              state.companyNetWorth * salary
-            )
-          ),
-        ]
-  )
-
-  const unsortedScenarios = uniqBy(permutations, ([a, b]) => `${a}${b}`)
-    .filter(([dividents, salary]) => {
-      return disabled
-        ? true
-        : salary + dividents <=
-            state.companyProfitEstimate + state.companyNetWorth
-    })
-    .map(([dividents, salary]) => {
-      const companyTaxes = getCorporateTax(state.companyProfitEstimate - salary)
-
-      const totalSharesInCompany = state.companyNetWorth
-
-      return {
-        dividents,
-        companyTaxesFromDividents: companyTaxesFromDividents(dividents),
-        salary,
-        capitalGainsTax: getCapitalGainsTaxEuroAmount(
-          dividents,
-          totalSharesInCompany
-        ),
-        incomeTax: getIncomeTaxEuroAmount(salary),
-        netIncome: getNetIncome(salary, dividents, totalSharesInCompany),
-        grossIncome: salary + dividents,
-        netSalary: salary - getIncomeTaxEuroAmount(salary),
-        incomeTaxPercentage: getIncomeTaxBracket(salary).percentage,
-        taxes: getTotalTaxEuroAmount(salary, dividents, totalSharesInCompany),
-        personalTaxes: getPersonalTaxes(
-          salary,
-          dividents,
-          totalSharesInCompany
-        ),
-        companyTaxes,
-        companyProfit: state.companyProfitEstimate - salary,
-      }
-    })
-
-  const scenarios = sortByBest(unsortedScenarios)
+  const scenarios = disabled
+    ? getScenarios(30_000, 100_000)
+    : getScenarios(state.companyProfitEstimate, state.companyNetWorth)
 
   const [cheapest] = scenarios
+    .filter(({ netIncome }) => netIncome !== 0)
+    .sort((a, b) => a.netIncome / a.taxes - b.netIncome / b.taxes)
+    .reverse()
   const mostExpensive = scenarios[scenarios.length - 1]
-  const ideal =
-    scenarios.filter(({ netIncome }) => netIncome >= state.livingExpenses)[0] ||
-    cheapest
+  const ideal = getIdealScenario(scenarios, state.livingExpenses) || cheapest
 
   const nextCheapest = scenarios[scenarios.indexOf(ideal) - 1]
   const { t, i18n } = useTranslation()
@@ -426,7 +220,6 @@ const IndexPage = () => {
                 id="minimum-income"
               />
             </div>
-            {/* <Chart ideal={ideal} label="Palkkatulon vaikutus verotukseen" /> */}
           </div>
         </form>
         <main>
@@ -628,7 +421,7 @@ const IndexPage = () => {
                         <Currency>{scenario.dividents}</Currency>
                       </td>
                       <td>
-                        <Currency>{scenario.capitalGainsTax}</Currency>
+                        <Currency>{scenario.taxFromDividents}</Currency>
                       </td>
 
                       <td>
