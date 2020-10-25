@@ -36,7 +36,7 @@ export function splitDividentIntoTaxableClasses(
 ) {
   const eightPercentagePart = totalSharesInCompany * 0.08
   const asCapitalGains = Math.min(eightPercentagePart, dividents)
-  const asWorkIncome = Math.max(0, dividents - asCapitalGains)
+  const asWorkIncome = Math.max(0, dividents - asCapitalGains) * 0.75
   return [asCapitalGains, asWorkIncome] as const
 }
 
