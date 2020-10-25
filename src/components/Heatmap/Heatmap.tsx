@@ -302,9 +302,7 @@ export function Heatmap(props: {
                       >
                         {scenario !== ideal && scenario !== cheapest && (
                           <span className="heatmap-ratio">
-                            {(scenario.taxes / scenario.netIncome || 0).toFixed(
-                              2
-                            )}
+                            {Math.round(scenario.ratio * 100)}%
                           </span>
                         )}
                         {scenario === ideal ? (

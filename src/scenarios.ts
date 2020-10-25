@@ -40,6 +40,7 @@ export interface IScenario {
   incomeTaxPercentage: number
   taxFromDividents: number
   grossIncome: number
+  ratio: number
 }
 
 export function sortByBest(scenarios: IScenario[]) {
@@ -70,7 +71,18 @@ function toScenario(
   const totalWorkIncome = salary + asWorkIncome
 
   const incomeTaxBracket = getIncomeTaxBracket(totalWorkIncome)
+  const taxes = getTotalTaxEuroAmount(
+    totalWorkIncome,
+    asCapitalGains,
+    dividents,
+    incomeTaxBracket
+  )
 
+  const netIncome = getNetIncome(
+    totalWorkIncome,
+    asCapitalGains,
+    incomeTaxBracket
+  )
   return {
     salary,
     dividents,
@@ -81,22 +93,18 @@ function toScenario(
     grossIncome: salary + dividents,
     incomeTaxPercentage: incomeTaxBracket.percentage,
     netSalary: salary - getIncomeTaxEuroAmount(salary, incomeTaxBracket),
-    taxes: getTotalTaxEuroAmount(
-      totalWorkIncome,
-      asCapitalGains,
-      dividents,
-      incomeTaxBracket
-    ),
+    taxes,
     personalTaxes: getPersonalTaxes(
       totalWorkIncome,
       asCapitalGains,
       incomeTaxBracket
     ),
-    netIncome: getNetIncome(totalWorkIncome, asCapitalGains, incomeTaxBracket),
+    netIncome,
     companyProfit: companyProfitEstimate - salary,
     taxFromDividents:
       getCapitalGainsTaxEuroAmount(asCapitalGains) +
       getIncomeTaxEuroAmount(asWorkIncome, incomeTaxBracket),
+    ratio: taxes / netIncome || 0,
   }
 }
 
@@ -148,7 +156,15 @@ export function getIdealScenario(
   scenarios: IScenario[],
   livingExpenses: number
 ) {
-  return scenarios.filter(({ netIncome }) => netIncome >= livingExpenses)[0]
+  const proficientScenarios = scenarios.filter(
+    ({ netIncome }) => netIncome >= livingExpenses
+  )
+
+  if (proficientScenarios.length === 0) {
+    return scenarios.sort((a, b) => b.netIncome - a.netIncome)[0]
+  }
+
+  return sortByBest(proficientScenarios)[0]
 }
 
 export function getScenarios(
