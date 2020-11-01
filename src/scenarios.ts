@@ -12,6 +12,7 @@ import {
   companyTaxesFromDividents,
   splitDividentIntoTaxableClasses,
 } from "./formulas"
+import first from "lodash/first"
 
 const f = (a: any[], b: any[]) =>
   // @ts-ignore
@@ -45,10 +46,6 @@ export interface IScenario {
 
 export function sortByBest(scenarios: IScenario[]) {
   return [...scenarios].sort((a, b) => a.taxes - b.taxes)
-}
-
-function easeInExpo(x: number): number {
-  return x === 0 ? 0 : Math.pow(2, 10 * x - 10)
 }
 
 const roundTo1000 = (value: number) => Math.round(value / 1000) * 1000
@@ -116,9 +113,15 @@ function getPermutations(
   [minDivident, maxDivident]: Range,
   [minSalary, maxSalary]: Range
 ) {
-  const brackets = range(100).map((i) => easeInExpo(i / 100))
+  const dividentBrackets = range(Math.floor(companyNetWorth / 1000)).map(
+    (val, i, arr) => i / arr.length
+  )
 
-  const permutations = permutate<number>(brackets, brackets)
+  const salaryBrackets = range(Math.floor(companyProfitEstimate / 1000)).map(
+    (val, i, arr) => i / arr.length
+  )
+
+  const permutations = permutate<number>(dividentBrackets, salaryBrackets)
     .map(([divident, salary]) => [
       roundTo1000(minDivident + (maxDivident - minDivident) * divident),
       roundTo1000(minSalary + (maxSalary - minSalary) * salary),
@@ -161,10 +164,10 @@ export function getIdealScenario(
   )
 
   if (proficientScenarios.length === 0) {
-    return scenarios.sort((a, b) => b.netIncome - a.netIncome)[0]
+    return first(scenarios.sort((a, b) => b.netIncome - a.netIncome))
   }
 
-  return sortByBest(proficientScenarios)[0]
+  return first(sortByBest(proficientScenarios))
 }
 
 export function getScenarios(

@@ -1,6 +1,6 @@
-import ReactTooltip from "react-tooltip"
 import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
 import uniq from "lodash/uniq"
+import first from "lodash/first"
 import mapValues from "lodash/mapValues"
 import i18Next from "i18next"
 import {
@@ -16,8 +16,7 @@ import SEO from "../components/seo"
 import { sendEvent } from "../tags"
 import { Currency } from "../components/Currency"
 import { Heatmap } from "../components/Heatmap/Heatmap"
-import { INCOME_TAX } from "../income-tax"
-import { getIncomeTaxBracket } from "../formulas"
+import { get } from "../util"
 import { getIdealScenario, getScenarios } from "../scenarios"
 import "./index.css"
 import en from "../i18n/en.json"
@@ -118,14 +117,24 @@ const IndexPage = () => {
     ? getScenarios(30_000, 100_000)
     : getScenarios(state.companyProfitEstimate, state.companyNetWorth)
 
-  const [cheapest] = scenarios
-    .filter(({ netIncome }) => netIncome !== 0)
-    .sort((a, b) => a.netIncome / a.taxes - b.netIncome / b.taxes)
-    .reverse()
-  const mostExpensive = scenarios[scenarios.length - 1]
+  const scenariosByNetIncomeTaxRatio = scenarios.sort(
+    (a, b) => a.netIncome / a.taxes - b.netIncome / b.taxes
+  )
+
+  const cheapest = first(
+    scenariosByNetIncomeTaxRatio
+      .filter(({ netIncome }) => netIncome !== 0)
+      .reverse()
+  )
+
+  const mostExpensive = get(scenarios, scenarios.length - 1)
+
   const ideal = getIdealScenario(scenarios, state.livingExpenses) || cheapest
 
-  const nextCheapest = scenarios[scenarios.indexOf(ideal) - 1]
+  const nextCheapest = get(
+    scenarios,
+    ideal !== undefined ? scenarios.indexOf(ideal) - 1 : -1
+  )
   const { t, i18n } = useTranslation()
 
   const toggleLanguage = () => {
@@ -225,13 +234,15 @@ const IndexPage = () => {
         <main>
           <h2>{t("scenariosTitle")}</h2>
           <p>{t("scenariosDescription")}</p>
-          <Heatmap
-            disabled={disabled}
-            livingExpenses={state.livingExpenses}
-            cheapest={cheapest}
-            ideal={ideal}
-            scenarios={scenarios}
-          />
+          {scenarios.length > 0 && cheapest && ideal && (
+            <Heatmap
+              disabled={disabled}
+              livingExpenses={state.livingExpenses}
+              cheapest={cheapest}
+              ideal={ideal}
+              scenarios={scenarios}
+            />
+          )}
         </main>
       </section>
       <div className="calculations">
@@ -244,20 +255,22 @@ const IndexPage = () => {
                 : t("calculationsDescriptionIdealCheapest")}
             </p>
             <div className="cards">
-              <Card
-                disabled={disabled}
-                className="card--ideal"
-                title={t("cardBestOption")}
-              >
-                <span className="card__value">{ideal.dividents} € </span>
-                <span className="card__value-type">{t("cardDivident")}</span>
-                <br />
-                <span className="card__value">{ideal.salary} € </span>
-                <span className="card__value-type">{t("cardSalary")}</span>
-              </Card>
+              {ideal && (
+                <Card
+                  disabled={disabled}
+                  className="card--ideal"
+                  title={t("cardBestOption")}
+                >
+                  <span className="card__value">{ideal.dividents} € </span>
+                  <span className="card__value-type">{t("cardDivident")}</span>
+                  <br />
+                  <span className="card__value">{ideal.salary} € </span>
+                  <span className="card__value-type">{t("cardSalary")}</span>
+                </Card>
+              )}
 
               {(() => {
-                if (scenarios.indexOf(ideal) < 1) {
+                if (!ideal || !nextCheapest || scenarios.indexOf(ideal) < 1) {
                   return null
                 }
 
@@ -321,7 +334,7 @@ const IndexPage = () => {
                   </p>
                 )
               })()}
-              {ideal !== cheapest && (
+              {ideal !== cheapest && cheapest && (
                 <Card
                   disabled={disabled}
                   className="card--cheapest"
@@ -334,19 +347,21 @@ const IndexPage = () => {
                   <span className="card__value-type">{t("cardSalary")}</span>
                 </Card>
               )}
-              <Card
-                disabled={disabled}
-                className="card--worst"
-                title={t("mostExpensiveOption")}
-              >
-                <span className="card__value">
-                  {mostExpensive.dividents} €{" "}
-                </span>
-                <span className="card__value-type">{t("cardDivident")}</span>
-                <br />
-                <span className="card__value">{mostExpensive.salary} € </span>
-                <span className="card__value-type">{t("cardSalary")}</span>
-              </Card>
+              {mostExpensive && (
+                <Card
+                  disabled={disabled}
+                  className="card--worst"
+                  title={t("mostExpensiveOption")}
+                >
+                  <span className="card__value">
+                    {mostExpensive.dividents} €{" "}
+                  </span>
+                  <span className="card__value-type">{t("cardDivident")}</span>
+                  <br />
+                  <span className="card__value">{mostExpensive.salary} € </span>
+                  <span className="card__value-type">{t("cardSalary")}</span>
+                </Card>
+              )}
             </div>
           </article>
           <aside>
@@ -373,9 +388,9 @@ const IndexPage = () => {
                 </thead>
                 <tbody>
                   {uniq([
-                    ideal,
+                    ...(ideal ? [ideal] : []),
                     ...(nextCheapest ? [nextCheapest] : []),
-                    cheapest,
+                    ...(cheapest ? [cheapest] : []),
                   ]).map((scenario, i) => (
                     <tr
                       className={classnames({
