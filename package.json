@@ -27,7 +27,7 @@
     "i18next": "^19.8.2",
     "i18next-browser-languagedetector": "^6.0.1",
     "jest": "^24.8.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "puppeteer": "^2.1.1",
     "react": "^16.8.6",
