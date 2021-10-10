@@ -139,7 +139,11 @@ const IndexPage = () => {
     .sort((a, b) => a.netIncome / a.taxes - b.netIncome / b.taxes)
     .reverse()
   const mostExpensive = scenarios[scenarios.length - 1]
-  const ideal = getIdealScenario(scenarios, state.livingExpenses) || cheapest
+  let ideal = getIdealScenario(scenarios, state.livingExpenses) || cheapest
+
+  if (ideal.taxes === cheapest.taxes && cheapest.netIncome > ideal.netIncome) {
+    ideal = cheapest
+  }
 
   const nextCheapest = scenarios[scenarios.indexOf(ideal) - 1]
   const { t, i18n } = useTranslation()
