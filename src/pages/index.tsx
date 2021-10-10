@@ -1,27 +1,28 @@
-import ReactTooltip from "react-tooltip"
-import React, { PropsWithChildren, useRef, useState, useEffect } from "react"
-import uniq from "lodash/uniq"
-import mapValues from "lodash/mapValues"
-import i18Next from "i18next"
-import {
-  useTranslation,
-  initReactI18next,
-  I18nextProvider,
-  Trans,
-} from "react-i18next"
-import LanguageDetector from "i18next-browser-languagedetector"
+import "./index.css"
+
 import classnames from "classnames"
+import i18Next from "i18next"
+import LanguageDetector from "i18next-browser-languagedetector"
+import mapValues from "lodash/mapValues"
+import uniq from "lodash/uniq"
+import React, { PropsWithChildren, useEffect, useState } from "react"
+import {
+  I18nextProvider,
+  initReactI18next,
+  Trans,
+  useTranslation,
+} from "react-i18next"
 import useLocalStorage from "react-use/lib/useLocalStorage"
-import SEO from "../components/seo"
-import { sendEvent } from "../tags"
+
 import { Currency } from "../components/Currency"
 import { Heatmap } from "../components/Heatmap/Heatmap"
-import { INCOME_TAX } from "../income-tax"
-import { getIncomeTaxBracket } from "../formulas"
-import { getIdealScenario, getScenarios } from "../scenarios"
-import "./index.css"
+import SEO from "../components/seo"
 import en from "../i18n/en.json"
 import fi from "../i18n/fi.json"
+import { getStateFromQueryParams, setQueryParams } from "../query-params"
+import { getIdealScenario, getScenarios } from "../scenarios"
+import { initialState, State } from "../state"
+import { sendEvent } from "../tags"
 
 i18Next
   .use(LanguageDetector)
@@ -62,15 +63,25 @@ function Card({
   )
 }
 
-const initialState = {
-  livingExpenses: 0,
-  companyNetWorth: 0,
-  companyProfitEstimate: 0,
-}
-
-const stateToDraftState = (state: typeof initialState) => ({
+const stateToDraftState = (state: State) => ({
   ...mapValues(state, (val) => (val === 0 ? "" : val.toString())),
 })
+
+export function isValidState(state: Partial<State>): state is State {
+  if (
+    !(
+      typeof state.companyNetWorth === "number" &&
+      typeof state.companyProfitEstimate === "number" &&
+      typeof state.livingExpenses === "number"
+    )
+  ) {
+    return false
+  }
+  const enoughAssetsToGenerateScenarios =
+    state.companyNetWorth + state.companyProfitEstimate + state.livingExpenses >
+    2000
+  return enoughAssetsToGenerateScenarios
+}
 
 const IndexPage = () => {
   const [storedState, setStoredState] = useLocalStorage(
@@ -84,8 +95,9 @@ const IndexPage = () => {
   const [draftState, setDraftState] = useState(initialDraftState)
 
   useEffect(() => {
-    setState(storedState)
-    setDraftState(stateToDraftState(storedState))
+    const startingState = getStateFromQueryParams() || storedState
+    setState(startingState)
+    setDraftState(stateToDraftState(startingState))
   }, [])
 
   const disabled =
@@ -109,8 +121,12 @@ const IndexPage = () => {
       }
       newState[key] = parsed
     }
+    if (!isValidState(newState)) {
+      return
+    }
     sendEvent("key-values-configured")
     setState(newState as typeof state)
+    setQueryParams(newState)
     setStoredState(newState as typeof state)
   }, [draftState])
 
