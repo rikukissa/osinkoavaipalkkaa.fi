@@ -119,11 +119,15 @@ export function Heatmap(props: {
 
   const scenarios = flatten(values(grid))
 
-  const third = Math.floor(scenarios.length * (1 / 3))
-  const cheapTier = scenarios.slice(0, third)
+  const scenariosByTaxes = scenarios.slice(0).sort((a, b) => a.taxes - b.taxes)
+  const third = Math.floor(scenariosByTaxes.length * (1 / 3))
+  const cheapTier = scenariosByTaxes.slice(0, third)
 
-  const mediumTier = scenarios.slice(third, third + third)
-  const expensiveTier = scenarios.slice(third + third, scenarios.length)
+  const mediumTier = scenariosByTaxes.slice(third, third + third)
+  const expensiveTier = scenariosByTaxes.slice(
+    third + third,
+    scenariosByTaxes.length
+  )
 
   const formatLabel = (label: number) =>
     label >= 1000 ? `${label / 1000}k` : label
